@@ -1,4 +1,7 @@
 # stockDataCatch
+
+@author kimi
+
 A Light Crawler Project that get stock infomation from internet. 
 
 这是一个简单的爬虫程序，基于spring4.2+mybatis3.2搭建
