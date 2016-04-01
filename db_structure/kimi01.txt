@@ -1,0 +1,39 @@
+CREATE TABLE `financail_statement` (
+  `code` varchar(8) NOT NULL COMMENT '股票代码',
+  `date` varchar(16) NOT NULL COMMENT '报告日期，格式yyyy-MM-dd',
+  `pe` double(16,4) DEFAULT NULL COMMENT '每股收益',
+  `bvps` double(16,4) DEFAULT NULL COMMENT '每股净资产',
+  `cps` double(16,4) DEFAULT '0.0000' COMMENT '每股现金流',
+  `roe` double(16,4) DEFAULT NULL COMMENT '净资产收益率',
+  `jroe` double(16,4) DEFAULT NULL COMMENT '总资产净利率',
+  `sgpr` double(16,4) DEFAULT NULL COMMENT '销售毛利率',
+  `smpr` double(16,4) DEFAULT '0.0000' COMMENT '销售净利率',
+  `dtar` double(16,4) DEFAULT '0.0000' COMMENT '资产负债率',
+  `opgr` double(16,4) DEFAULT '0.0000' COMMENT '同比净利润增长率',
+  `toi` double(24,2) DEFAULT NULL COMMENT '营业总收入',
+  `toc` double(24,2) DEFAULT NULL COMMENT '营业总成本',
+  `oi` double(24,2) DEFAULT NULL COMMENT '营业收入',
+  `oc` double(24,2) DEFAULT NULL COMMENT '营业成本',
+  `op` double(16,2) DEFAULT NULL COMMENT '营业利润',
+  `tp` double(16,2) DEFAULT NULL COMMENT '利润总额',
+  `mp` double(16,2) DEFAULT NULL COMMENT '净利润',
+  `mpbpc` double(16,2) DEFAULT NULL COMMENT '归属母公司的净利润',
+  `ta` double(24,2) DEFAULT '0.00' COMMENT '总资产',
+  `tl` double(24,2) DEFAULT '0.00' COMMENT '负债总额',
+  `se` double(24,2) DEFAULT NULL COMMENT '股东权益',
+  `tacf` double(24,2) DEFAULT NULL COMMENT '经营活动产生的现金流',
+  `iacf` double(24,2) DEFAULT NULL COMMENT '投资活动产生的现金流',
+  `facf` double(24,2) DEFAULT NULL COMMENT '筹资活动产生的现金流',
+  `cnca` double(24,2) DEFAULT NULL COMMENT '现金及等价物净增加',
+  PRIMARY KEY (`code`,`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `stock_info` (
+  `code` varchar(8) NOT NULL COMMENT '股票交易代码',
+  `type` varchar(10) DEFAULT NULL COMMENT '股票类型：01沪市主板，02深市主板',
+  `name` varchar(100) DEFAULT NULL COMMENT '股票名称',
+  `sc` bigint(16) DEFAULT NULL COMMENT '股本数量',
+  PRIMARY KEY (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
