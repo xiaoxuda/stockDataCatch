@@ -8,4 +8,4 @@ A Light Crawler Project that get stock infomation from internet.
 
 程序结构分为：任务提交Controller、任务存储队列QueueService、任务执行Catcher
 
-项目中共有三条爬虫负责抓取上市公司的基本和财务信息。
+项目中共有三条爬虫负责抓取上市公司的基本信息和财务信息。
