@@ -1,4 +1,4 @@
-﻿
+
 package com.kimi.entity;
 
 /**
@@ -35,6 +35,8 @@ public class FinancailStatement implements java.io.Serializable {
 	public static final String ALIAS_IACF = "投资活动产生的现金流";
 	public static final String ALIAS_FACF = "筹资活动产生的现金流";
 	public static final String ALIAS_CNCA = "现金及等价物净增加";
+	public static final String ALIAS_TOIUPRATE = "营收增长率";
+	public static final String ALIAS_TPUPRATE = "利润增长率";
 	
 	//date formats
 	
@@ -65,6 +67,8 @@ public class FinancailStatement implements java.io.Serializable {
 	private java.lang.Double iacf;
 	private java.lang.Double facf;
 	private java.lang.Double cnca;
+	private java.lang.Float toiuprate;
+	private java.lang.Float tpuprate;
 	//columns END
 
 	public FinancailStatement(){
@@ -260,6 +264,20 @@ public class FinancailStatement implements java.io.Serializable {
 	public java.lang.Double getCnca() {
 		return this.cnca;
 	}
+	public void setToiuprate(java.lang.Float value) {
+		this.toiuprate = value;
+	}
+	
+	public java.lang.Float getToiuprate() {
+		return this.toiuprate;
+	}
+	public void setTpuprate(java.lang.Float value) {
+		this.tpuprate = value;
+	}
+	
+	public java.lang.Float getTpuprate() {
+		return this.tpuprate;
+	}
 
 	//region toString & equals & clone
     @Override
@@ -313,6 +331,8 @@ public class FinancailStatement implements java.io.Serializable {
 			 newobj.iacf=this.iacf;
 			 newobj.facf=this.facf;
 			 newobj.cnca=this.cnca;
+			 newobj.toiuprate=this.toiuprate;
+			 newobj.tpuprate=this.tpuprate;
 		return newobj;
 	}
 	//endregion

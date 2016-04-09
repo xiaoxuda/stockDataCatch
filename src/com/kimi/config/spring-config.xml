@@ -13,7 +13,7 @@
 
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
 	  <property name="dataSource" ref="dataSource" />
-	  <property name="mapperLocations" value="classpath*:com/kimi/dao/g/*Mapper.xml" />
+	  <property name="mapperLocations" value="classpath*:com/kimi/dao/**/*Mapper.xml" />
 	</bean>
 	
 	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
@@ -52,5 +52,10 @@
     <bean id="stockInfoDetailCatcher"
         class="com.kimi.catcher.StockInfoDetailCatcher">
         <property name="stockInfoService" ref="stockInfoService"></property>
+    </bean>
+    
+    <bean id="increaseRateCalculator" class="com.kimi.calculator.IncreaseRateCalculator">
+    	<property name="financailStatementService" ref="financailStatementService"></property>
+    	<property name="stockInfoService" ref="stockInfoService"></property>
     </bean>
 </beans>
