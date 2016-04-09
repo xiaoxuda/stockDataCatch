@@ -3,6 +3,7 @@ package com.kimi.controller;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.kimi.calculator.IncreaseRateCalculator;
 import com.kimi.catcher.BaseCatcher;
 import com.kimi.catcher.FinancailStatementCatcher;
 import com.kimi.catcher.StockInfoCatcher;
@@ -36,5 +37,10 @@ public class MyController {
 		//上市公司财务报表
 		BaseCatcher estcatcher = context.getBean("financailStatementCatcher",FinancailStatementCatcher.class);
 		estcatcher.start();
+		
+		//计算财务数据变化率
+		IncreaseRateCalculator increaseRateCalculator = context.getBean("increaseRateCalculator",IncreaseRateCalculator.class);
+		increaseRateCalculator.submitCalculate();
+		
 	}
 }
