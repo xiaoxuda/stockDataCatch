@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 数据库基本操作 -->
+<mapper namespace="com.kimi.stockanalysis.dao.StockInfoDao">
+    <insert id="insert" parameterType="com.kimi.stockanalysis.entity.StockInfo">
+        INSERT INTO `stock_info` (
+        	code ,
+        	type ,
+        	name ,
+        	sc 
+        ) VALUES (
+        	#{code} ,
+        	#{type} ,
+        	#{name} ,
+        	#{sc} 
+        )
+    </insert>
+
+	<delete id="delete">
+        DELETE FROM `stock_info`
+        WHERE
+	        code = #{code} 
+	</delete>
+	
+	<update id="update" parameterType="com.kimi.stockanalysis.entity.StockInfo">
+        UPDATE `stock_info` 
+		SET
+	        type = #{type} ,
+	        name = #{name} ,
+	        sc = #{sc} 
+        WHERE
+	        code = #{code} 
+    </update>
+	
+    <update id="updateSelective" parameterType="com.kimi.stockanalysis.entity.StockInfo">
+        UPDATE `stock_info`
+		SET
+	        code = #{code} 
+			<if test="type!=null" >,type = #{type}</if>
+			<if test="name!=null" >,name = #{name}</if>
+			<if test="sc!=null" >,sc = #{sc}</if>
+        WHERE 
+	        code = #{code} 
+    </update>
+	
+    <select id="selectOne" resultType="com.kimi.stockanalysis.entity.StockInfo">
+        SELECT *
+		FROM `stock_info`
+        WHERE 
+	        code = #{code} 
+    </select>
+	
+    <select id="selectList" resultType="com.kimi.stockanalysis.entity.StockInfo">
+        SELECT *
+		FROM `stock_info`
+        WHERE 1=1
+	        <if test="code!=null" > AND code = #{code}</if>
+	        <if test="type!=null" > AND type = #{type}</if>
+	        <if test="name!=null" > AND name = #{name}</if>
+	        <if test="sc!=null" > AND sc = #{sc}</if>
+    </select>
+</mapper>
+

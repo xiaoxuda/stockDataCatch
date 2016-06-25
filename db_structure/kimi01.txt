@@ -3,7 +3,7 @@ CREATE TABLE `financail_statement` (
   `date` varchar(16) NOT NULL COMMENT '报告日期，格式yyyy-MM-dd',
   `pe` double(16,4) DEFAULT NULL COMMENT '每股收益',
   `bvps` double(16,4) DEFAULT NULL COMMENT '每股净资产',
-  `cps` double(16,4) NOT NULL DEFAULT '0.0000' COMMENT '每股现金流',
+  `cps` double(16,4) DEFAULT '0.0000' COMMENT '每股现金流',
   `roe` double(16,4) DEFAULT NULL COMMENT '净资产收益率',
   `jroe` double(16,4) DEFAULT NULL COMMENT '总资产净利率',
   `sgpr` double(16,4) DEFAULT NULL COMMENT '销售毛利率',
@@ -25,10 +25,8 @@ CREATE TABLE `financail_statement` (
   `iacf` double(24,2) DEFAULT NULL COMMENT '投资活动产生的现金流',
   `facf` double(24,2) DEFAULT NULL COMMENT '筹资活动产生的现金流',
   `cnca` double(24,2) DEFAULT NULL COMMENT '现金及等价物净增加',
-  `toiuprate` float(12,2) DEFAULT NULL COMMENT '营收增长率',
-  `tpuprate` float(12,2) DEFAULT NULL COMMENT '利润增长率',
   PRIMARY KEY (`code`,`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `stock_info` (
   `code` varchar(8) NOT NULL COMMENT '股票交易代码',
