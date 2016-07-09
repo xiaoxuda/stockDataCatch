@@ -12,4 +12,5 @@ public class StockInfoDao extends BaseDao<StockInfo, java.lang.String> {
 	public StockInfoDao(){
 		this.namespace="com.kimi.stockanalysis.dao.StockInfoDao";
 	}
+	
 }

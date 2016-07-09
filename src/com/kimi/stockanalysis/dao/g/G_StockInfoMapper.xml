@@ -10,12 +10,16 @@
         	code ,
         	type ,
         	name ,
-        	sc 
+        	sc ,
+        	price ,
+        	modify_time 
         ) VALUES (
         	#{code} ,
         	#{type} ,
         	#{name} ,
-        	#{sc} 
+        	#{sc} ,
+        	#{price} ,
+        	#{modifyTime} 
         )
     </insert>
 
@@ -30,7 +34,9 @@
 		SET
 	        type = #{type} ,
 	        name = #{name} ,
-	        sc = #{sc} 
+	        sc = #{sc} ,
+	        price = #{price} ,
+	        modify_time = #{modifyTime} 
         WHERE
 	        code = #{code} 
     </update>
@@ -42,6 +48,8 @@
 			<if test="type!=null" >,type = #{type}</if>
 			<if test="name!=null" >,name = #{name}</if>
 			<if test="sc!=null" >,sc = #{sc}</if>
+			<if test="price!=null" >,price = #{price}</if>
+			<if test="modifyTime!=null" >,modify_time = #{modifyTime}</if>
         WHERE 
 	        code = #{code} 
     </update>
@@ -61,6 +69,8 @@
 	        <if test="type!=null" > AND type = #{type}</if>
 	        <if test="name!=null" > AND name = #{name}</if>
 	        <if test="sc!=null" > AND sc = #{sc}</if>
+	        <if test="price!=null" > AND price = #{price}</if>
+	        <if test="modifyTime!=null" > AND modify_time = #{modifyTime}</if>
     </select>
 </mapper>
 

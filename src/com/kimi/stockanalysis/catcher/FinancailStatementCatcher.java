@@ -23,9 +23,12 @@ public class FinancailStatementCatcher extends BaseCatcher{
 	public void setFinancailStatementService(FinancailStatementService financailStatementService){
 		this.financailStatementService=financailStatementService;
 	};
-	public FinancailStatementCatcher(){
-		this.key=TaskTypeEnum.EASTMONEYNET_STATEMENT;
+	
+	@Override
+	public String getTaskkey() {
+		return TaskTypeEnum.EASTMONEYNET_STATEMENT;
 	}
+	
 	@Override
 	public boolean extract(String src,CatchTask task){
 		if(src==null || src=="" || src.contains("该品种暂无此项记录!")){

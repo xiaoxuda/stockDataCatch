@@ -19,9 +19,12 @@ public class StockInfoDetailCatcher extends BaseCatcher{
 	public void setStockInfoService(StockInfoService stockInfoService){
 		this.stockInfoService=stockInfoService;
 	};
-	public StockInfoDetailCatcher(){
-		this.key=TaskTypeEnum.JUCAONET_COMPANY_SHARECAPITAL;
+	
+	@Override
+	public String getTaskkey() {
+		return TaskTypeEnum.JUCAONET_COMPANY_SHARECAPITAL;
 	}
+	
 	@Override
 	public boolean extract(String src,CatchTask task){
 		if(src==null || src=="" || src.contains("没有查询到数据！")){

@@ -1,14 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
     xsi:schemaLocation="http://www.springframework.org/schema/beans
-        http://www.springframework.org/schema/beans/spring-beans.xsd">
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context 
+ 		http://www.springframework.org/schema/context/spring-context-2.5.xsd"
+    default-autowire="byName" >
+
+	<!-- context:annotation-config标签可以替代以下四个processor -->
+    <!-- 该 BeanPostProcessor 将自动起作用，对标注 @Autowired 的 Bean 进行自动注入 -->
+    <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/>
+	<!-- 该BeanPostProcessor 将自动起作用，对标注@Resource、@PostConstruct 以及 @PreDestroy等 JSR-250 注释的Bean进行自动注入 -->
+	<bean class="org.springframework.context.annotation.CommonAnnotationBeanPostProcessor"/>
+	<!-- bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor"/ -->	
+	<!-- <bean class="org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor"/> -->
+ 	<!-- 包自动扫描机制，自动扫描给定位置内的注解 并提供解析器-->
+	<!-- 自动扫描指定包内的注解并引入以上四个注解处理器进行注解处理，引入后无需再手工添加以上四个注解处理器bean -->
+	<!-- <context:component-scan base-package="com.kimi.stockanalysis*"></context:component-scan> -->
+
+	<!-- 环境变量配置加载 -->
+	<context:property-placeholder location="classpath:com/kimi/stockanalysis/config/jdbc.properties"/>
 
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-	    <property name="driverClassName" value="com.mysql.jdbc.Driver" />
-	    <property name="url" value="jdbc:mysql://localhost:3306/kimi01?characterEncoding=UTF-8" />
-	    <property name="username" value="xxd" />
-	    <property name="password" value="xiao0715" />
+	    <property name="driverClassName" value="${jdbc.driverClassName}" />
+	    <property name="url" value="${jdbc.url}" />
+	    <property name="username" value="${jdbc.username}" />
+	    <property name="password" value="${jdbc.password}" />
 	</bean>
 
 	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
@@ -39,6 +57,12 @@
         <property name="financailStatementDao" ref="financailStatementDao"></property>
     </bean>
     
+    <bean id="taskGenerateService"
+    	class="com.kimi.stockanalysis.service.TaskGenerateService"></bean>
+    
+   	<bean id="catcherManageService"
+    	class="com.kimi.stockanalysis.service.CatcherManageService"></bean>
+    
     <bean id="financailStatementCatcher"
         class="com.kimi.stockanalysis.catcher.FinancailStatementCatcher">
         <property name="financailStatementService" ref="financailStatementService"></property>
@@ -52,5 +76,9 @@
     <bean id="stockInfoDetailCatcher"
         class="com.kimi.stockanalysis.catcher.StockInfoDetailCatcher">
         <property name="stockInfoService" ref="stockInfoService"></property>
+    </bean>
+    
+    <bean id="stockRealtimePriceCatcher"
+        class="com.kimi.stockanalysis.catcher.StockRealtimePriceCatcher">
     </bean>
 </beans>

@@ -14,7 +14,6 @@ import com.kimi.stockanalysis.entity.StockInfo;
 import com.kimi.stockanalysis.enums.TaskTypeEnum;
 import com.kimi.stockanalysis.service.CatchTask;
 import com.kimi.stockanalysis.service.StockInfoService;
-import com.kimi.stockanalysis.service.TaskQueueService;
 /*
  * @author kimi
  * @see 抓取股票代码与名称、股票类型
@@ -44,10 +43,12 @@ public class StockInfoCatcher extends BaseCatcher{
 		typeMap.put(TypeClass.SZCN,"02");
 		typeMap.put(TypeClass.SHMB,"01");
 	}
-	
-	public StockInfoCatcher(){
-		this.key=TaskTypeEnum.JUCAONET_COMPANY_LIST;
+
+	@Override
+	public String getTaskkey() {
+		return TaskTypeEnum.JUCAONET_COMPANY_LIST;
 	}
+	
 	@Override
 	protected boolean extract(String src,CatchTask task){
 		if(src==null || src==""){
@@ -77,6 +78,12 @@ public class StockInfoCatcher extends BaseCatcher{
 		createOrUpdate(result,task);
 		return true;
 	}
+	/**
+	 * 
+	 * @param map
+	 * @param task
+	 * @return
+	 */
 	private boolean createOrUpdate(Map<String,List<String>> map,CatchTask task){
 		  for(String type : map.keySet()){
 			  List<String> list = map.get(type);
@@ -99,36 +106,9 @@ public class StockInfoCatcher extends BaseCatcher{
 					  stockInfoService.insert(fs);
 				  }
 				  
-				  //提交公司详细信息抓取任务
-				  commitDetailInfoTask(code,type);
-				  //提交公司财务报表抓取任务
-				  commitFinancailStatementTask(code,type);
 			  }
 		  }
 		  return true;
 	}
-	/**
-	 * 生成抓取公司详细信息的任务
-	 * @param code	股票代码
-	 * @param type	股票类型
-	 */
-	private void commitDetailInfoTask(String code,String type){
-		CatchTask task_detail=new CatchTask();
-		task_detail.addInfo("code", code);
-		task_detail.setType(TaskTypeEnum.JUCAONET_COMPANY_SHARECAPITAL);
-		task_detail.setUrl("http://www.cninfo.com.cn/information/lastest/"+type+code+".html");
-		TaskQueueService.commitTask(TaskTypeEnum.JUCAONET_COMPANY_SHARECAPITAL,task_detail);
-	}
-	/**
-	 * 生成抓取公司财务报表的任务
-	 * @param code	股票代码
-	 * @param type	股票类型
-	 */
-	private void commitFinancailStatementTask(String code,String type){
-		CatchTask task=new CatchTask();
-		task.setType(TaskTypeEnum.EASTMONEYNET_STATEMENT);
-		task.setUrl("http://soft-f9.eastmoney.com/soft/gp13.php?code="+code+typeMap.get(type));
-		task.addInfo("code",code);
-		TaskQueueService.commitTask(TaskTypeEnum.EASTMONEYNET_STATEMENT,task);
-	}
+
 }
