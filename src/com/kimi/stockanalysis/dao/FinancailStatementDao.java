@@ -5,7 +5,7 @@ import com.kimi.stockanalysis.dao.g.BaseDao;
 import com.kimi.stockanalysis.entity.FinancailStatement;
 /**
  * @author kimi
- * @version 0.99
+ * @version 1.0
  * @see 继承基类，定义基本操作以外的数据库操作
  */
 public class FinancailStatementDao extends BaseDao<FinancailStatement,FinancailStatement> {

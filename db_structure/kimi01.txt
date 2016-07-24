@@ -1,4 +1,4 @@
-CREATE TABLE `financail_statement` (
+﻿CREATE TABLE `financail_statement` (
   `code` varchar(8) NOT NULL COMMENT '股票代码',
   `date` varchar(16) NOT NULL COMMENT '报告日期，格式yyyy-MM-dd',
   `pe` double(16,4) DEFAULT NULL COMMENT '每股收益',
@@ -33,7 +33,9 @@ CREATE TABLE `stock_info` (
   `type` varchar(10) DEFAULT NULL COMMENT '股票类型：01沪市主板，02深市主板',
   `name` varchar(100) DEFAULT NULL COMMENT '股票名称',
   `sc` bigint(16) DEFAULT NULL COMMENT '股本数量',
+  `price` float(6,2) DEFAULT '0.00' COMMENT '当前价格',
+  `modify_time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
 
 

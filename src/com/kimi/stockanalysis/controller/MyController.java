@@ -9,6 +9,7 @@ import com.kimi.stockanalysis.service.CatcherManageService;
 import com.kimi.stockanalysis.service.TaskGenerateService;
 
 /*
+ * 程序入口，app程序
  * @author kimi
  */
 public class MyController {
@@ -25,8 +26,11 @@ public class MyController {
 		
 		CatcherManageService catcherManageService = context.getBean("catcherManageService",CatcherManageService.class);
 		TaskGenerateService taskGenerateService = context.getBean("taskGenerateService",TaskGenerateService.class);
-		
+		//启动爬虫
 		catcherManageService.startCatcher();
-		taskGenerateService.execute();
+		//开启爬虫监控
+		catcherManageService.startCatcherMonitor();
+		//启动任务生成器
+		taskGenerateService.startGenerator();
 	}
 }

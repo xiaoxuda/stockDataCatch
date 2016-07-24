@@ -7,25 +7,21 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.kimi.stockanalysis.entity.StockInfo;
 import com.kimi.stockanalysis.enums.TaskTypeEnum;
 import com.kimi.stockanalysis.service.CatchTask;
-import com.kimi.stockanalysis.service.StockInfoService;
+import com.kimi.stockanalysis.service.StockDataService;
 /*
  * @author kimi
  * @see 抓取股票代码与名称、股票类型
  */
 public class StockInfoCatcher extends BaseCatcher{
-	private StockInfoService stockInfoService;
 	
-	private Logger logger = LoggerFactory.getLogger(StockInfoCatcher.class);
-	
-	public void setStockInfoService(StockInfoService stockInfoService){
-		this.stockInfoService=stockInfoService;
-	};
+	@Autowired
+	private StockDataService stockDataService;
+		
 	//股票类型
 	public class TypeClass{
 		public final static String SZMB="szmb";
@@ -46,19 +42,19 @@ public class StockInfoCatcher extends BaseCatcher{
 
 	@Override
 	public String getTaskkey() {
-		return TaskTypeEnum.JUCAONET_COMPANY_LIST;
+		return TaskTypeEnum.JUCAONET_COMPANY_LIST.getCode();
 	}
 	
 	@Override
 	protected boolean extract(String src,CatchTask task){
 		if(src==null || src==""){
-			logger.error("TaskType:"+task.getType()+" param:"+task.getInfo()+" info:抓取公司列表失败！");
+			LOGGER.error("抓取公司列表失败,TaskType:{},param:{}",task.getType(), task.getInfo());
 			return false;
 		}
 		int start=src.indexOf("<div class=\"list-ct\">");
 		int end=StringUtils.indexOf(src, "</div></div><div class=\"clear\">", start);
 		if(start==-1 || end==-1){
-			logger.error("TaskType:"+task.getType()+" param:"+task.getInfo()+" info:抓取公司列表失败！");
+			LOGGER.error("抓取公司列表失败,TaskType:{},param:{}",task.getType(), task.getInfo());
 			return false;
 		}
 		//需要使用webclient
@@ -79,6 +75,7 @@ public class StockInfoCatcher extends BaseCatcher{
 		return true;
 	}
 	/**
+	 * 批量插入或者更新股票基本信息
 	 * 
 	 * @param map
 	 * @param task
@@ -89,22 +86,13 @@ public class StockInfoCatcher extends BaseCatcher{
 			  List<String> list = map.get(type);
 			  for(String s : list){
 				  String code=s.substring(0, 6);
+				  
 				  StockInfo si = new StockInfo();
 				  si.setCode(code);
-				  StockInfo old = stockInfoService.selectOne(code);
-				  if(old!=null){
-					  StockInfo fs = new StockInfo();
-					  fs.setCode(old.getCode());
-					  fs.setName(s.substring(6).replace(" ", ""));
-					  fs.setType(type);
-					  stockInfoService.updateSelective(fs);
-				  }else{
-					  StockInfo fs = new StockInfo();
-					  fs.setCode(code);
-					  fs.setName(s.substring(6).replace(" ", ""));
-					  fs.setType(type);
-					  stockInfoService.insert(fs);
-				  }
+				  si.setName(s.substring(6).replace(" ", ""));
+				  si.setType(type);
+				  
+				  stockDataService.siUpdateOrInsert(si);
 				  
 			  }
 		  }

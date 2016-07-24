@@ -4,26 +4,25 @@
 package com.kimi.stockanalysis.catcher;
 
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.kimi.stockanalysis.entity.StockInfo;
 import com.kimi.stockanalysis.enums.TaskTypeEnum;
 import com.kimi.stockanalysis.service.CatchTask;
-import com.kimi.stockanalysis.service.StockInfoService;
+import com.kimi.stockanalysis.service.StockDataService;
 
 /**
  * @author kimi
  *
  */
 public class StockRealtimePriceCatcher extends BaseCatcher {
-	private StockInfoService stockInfoService;
-
-	public void setStockInfoService(StockInfoService stockInfoService) {
-		this.stockInfoService = stockInfoService;
-	}
+	
+	@Autowired
+	private StockDataService stockDataService;
 
 	@Override
 	public String getTaskkey() {
-		return TaskTypeEnum.SINAJS_PRICE;
+		return TaskTypeEnum.SINAJS_PRICE.getCode();
 	}
 
 	/**
@@ -47,14 +46,14 @@ public class StockRealtimePriceCatcher extends BaseCatcher {
 			return false;
 		}
 
-		StockInfo stockInfo = stockInfoService.selectOne(task.getInfoValue("code").toString());
-
 		String price = StringUtils.isBlank(arr[3]) || Float.valueOf(arr[3]) == 0 ? arr[2] : arr[3];
 
+		StockInfo stockInfo = new StockInfo();
+		stockInfo.setCode(task.getInfoValue("code").toString());
 		stockInfo.setPrice(Float.valueOf(price));
-		stockInfoService.updateSelective(stockInfo);
+		int cnt = stockDataService.siUpdateOrInsert(stockInfo, false);
 
-		return false;
+		return cnt == 1;
 	}
 
 }

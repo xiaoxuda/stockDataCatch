@@ -16,13 +16,14 @@ import com.kimi.stockanalysis.service.TaskQueueService;
  * @author kimi
  */
 public abstract class BaseCatcher {
+	/** 为每个子类提供一个区别化的日志类 **/
 	protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 	
 	private boolean isRunning = false; // 标识任务正在运行
 	private int defaultWaitTime = 1000; // 默认抓取间隔
-	private int maxWaitTime = 60 * 60 * 1000; // 最大抓取间隔
+	private int maxWaitTime = 2 * 60 * 1000; // 最大抓取间隔2分钟
 	private int waitTime = 1000; // 当前抓取间隔
-	private int waitMultiplier = 10;//抓取时间乘数
+	private int waitMultiplier = 2;//抓取时间乘数
 	private int againTime = 5; // 异常重试次数
 
 	/**
@@ -35,7 +36,7 @@ public abstract class BaseCatcher {
 	protected abstract boolean extract(String src, CatchTask task);
 
 	/**
-	 * 返回任务关键字，不能为空
+	 * 返回任务关键字，不能为空，需要爬虫具体实现
 	 * 
 	 * @author kimi
 	 * @return 返回值不能为空
@@ -54,10 +55,10 @@ public abstract class BaseCatcher {
 	 * 启动爬虫,定时请求数据抓取任务
 	 */
 	public void start() {
-		if (isRunning) {
+		if (this.isRunning) {
 			return;
 		}
-		Thread thread_catcher = new Thread(getTaskkey()) {
+		Thread thread_catcher = new Thread(getTaskkey()+"_Catcher") {
 			public void run() {
 				while (true) {
 					CatchTask task = TaskQueueService.getTask(getTaskkey());
@@ -66,7 +67,7 @@ public abstract class BaseCatcher {
 							LOGGER.info("{}:no task", getTaskkey());
 							
 							if (waitTime == maxWaitTime) {
-								LOGGER.info("{}:等待任务时间超时，爬虫推出，等待重新唤起。", getTaskkey());
+								LOGGER.info("{}:等待任务时间超时，爬虫退出，等待重新唤起。", getTaskkey());
 								break;
 							}
 							waitTime *= waitMultiplier;
@@ -78,14 +79,15 @@ public abstract class BaseCatcher {
 						Thread.sleep(waitTime);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						LOGGER.error("任务{},异常信息{}", task, e.getMessage());
 					}
 				}
 				isRunning = false;
 			}
 		};
-		LOGGER.info("{}:start", getTaskkey());
+		LOGGER.info("{}:start", getTaskkey()+"_Catcher");
 		thread_catcher.start();
+		this.isRunning = true;
 	}
 
 	/**
@@ -113,10 +115,12 @@ public abstract class BaseCatcher {
 			extract(builder.toString(), task);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("任务{},异常信息{}", task, e.getMessage());
 			// 异常重试
 			if (againTime > 0) {
 				catchAction(task, againTime - 1);
+			}else{
+				LOGGER.info("任务重试超过{}次，重新放回任务队列等待调度，参数{}", againTime, task);
 			}
 		}
 		return null;

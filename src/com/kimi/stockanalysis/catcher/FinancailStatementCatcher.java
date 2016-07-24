@@ -4,35 +4,30 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.kimi.stockanalysis.entity.FinancailStatement;
 import com.kimi.stockanalysis.enums.TaskTypeEnum;
 import com.kimi.stockanalysis.service.CatchTask;
-import com.kimi.stockanalysis.service.FinancailStatementService;
+import com.kimi.stockanalysis.service.StockDataService;
 /*
  * @author kimi
  * @see 抓取上市公司财务报表
  */
 public class FinancailStatementCatcher extends BaseCatcher{
-	private FinancailStatementService financailStatementService;
 	
-	private Logger logger = LoggerFactory.getLogger(FinancailStatementCatcher.class);
-	
-	public void setFinancailStatementService(FinancailStatementService financailStatementService){
-		this.financailStatementService=financailStatementService;
-	};
-	
+	@Autowired
+	private StockDataService stockDataService;
+		
 	@Override
 	public String getTaskkey() {
-		return TaskTypeEnum.EASTMONEYNET_STATEMENT;
+		return TaskTypeEnum.EASTMONEYNET_STATEMENT.getCode();
 	}
 	
 	@Override
 	public boolean extract(String src,CatchTask task){
 		if(src==null || src=="" || src.contains("该品种暂无此项记录!")){
-			logger.error("TaskType:"+task.getType()+" param:"+task.getInfo()+" info:抓取财务报表失败！");
+			LOGGER.error("TaskType:"+task.getType()+" param:"+task.getInfo()+" info:抓取财务报表失败！");
 			return false;
 		}
 		int start=src.indexOf("<table id=\"tablefont\"");
@@ -86,7 +81,7 @@ public class FinancailStatementCatcher extends BaseCatcher{
 				result=Double.valueOf(s.isEmpty()?"0":s);
 			}
 		}catch(Exception e){
-			e.printStackTrace();
+			LOGGER.error("异常信息{}", e.getMessage());
 		}
 		return result;
 	}
@@ -126,12 +121,7 @@ public class FinancailStatementCatcher extends BaseCatcher{
 			  financailStatement.setFacf(extractData(aList.get(26)[i]));
 			  financailStatement.setCnca(extractData(aList.get(27)[i]));
 			  
-			  FinancailStatement old = financailStatementService.selectOne(financailStatement);
-			  if(old!=null){
-				  financailStatementService.updateSelective(financailStatement);
-			  }else{
-				  financailStatementService.insert(financailStatement);
-			  }
+			  stockDataService.fsUpdateOrInsert(financailStatement);
 		  }
 		  return true;
 	}

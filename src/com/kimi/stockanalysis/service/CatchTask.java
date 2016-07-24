@@ -1,12 +1,15 @@
 package com.kimi.stockanalysis.service;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CatchTask {
-	public String type;//任务类型
-	public String url;//目标url
-	public Map<String,Object> info;//任务信息
+public class CatchTask implements Serializable{
+	private static final long serialVersionUID = 6388382222106508105L;
+	
+	public String 				type;//任务类型
+	public String 				url;//目标url
+	public Map<String,Object> 	info;//任务信息
 	
 	
 	public String getType() {

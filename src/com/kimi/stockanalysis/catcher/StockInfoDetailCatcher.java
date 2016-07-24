@@ -1,40 +1,35 @@
 package com.kimi.stockanalysis.catcher;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.kimi.stockanalysis.entity.StockInfo;
 import com.kimi.stockanalysis.enums.TaskTypeEnum;
 import com.kimi.stockanalysis.service.CatchTask;
-import com.kimi.stockanalysis.service.StockInfoService;
+import com.kimi.stockanalysis.service.StockDataService;
 /*
  * @author kimi
  * @see 抓取上市公司股票数量
  */
 public class StockInfoDetailCatcher extends BaseCatcher{
-	private StockInfoService stockInfoService;
 	
-	private Logger logger = LoggerFactory.getLogger(StockInfoDetailCatcher.class);
-	
-	public void setStockInfoService(StockInfoService stockInfoService){
-		this.stockInfoService=stockInfoService;
-	};
-	
+	@Autowired
+	private StockDataService stockDataService;
+		
 	@Override
 	public String getTaskkey() {
-		return TaskTypeEnum.JUCAONET_COMPANY_SHARECAPITAL;
+		return TaskTypeEnum.JUCAONET_COMPANY_SHARECAPITAL.getCode();
 	}
 	
 	@Override
 	public boolean extract(String src,CatchTask task){
 		if(src==null || src=="" || src.contains("没有查询到数据！")){
-			logger.error("TaskType:"+task.getType()+" param:"+task.getInfo()+" info:公司详细信息抓取失败！");
+			LOGGER.error("公司详细信息抓取失败,TaskType:{} param:",task.getType(),task.getInfo());
 			return false;
 		}
 		//提取数据
 		int start=src.indexOf("zx_data2");
 		if(start==-1){
-			logger.error("TaskType:"+task.getType()+" param:"+task.getInfo()+" info:公司详细信息提取失败！");
+			LOGGER.error("公司详细信息抓取失败,TaskType:{} param:",task.getType(),task.getInfo());
 			return false;
 		}
 		src=src.substring(start);
@@ -45,20 +40,15 @@ public class StockInfoDetailCatcher extends BaseCatcher{
 		src=src.replaceAll("[^0-9]", "");
 		Long l = Long.valueOf(src.isEmpty()?"0":src);
 		if(l.equals(0)){
-			logger.error("TaskType:"+task.getType()+" param:"+task.getInfo()+" info:公司详细信息提取失败！");
+			LOGGER.error("公司详细信息抓取失败,TaskType:{} param:",task.getType(),task.getInfo());
 			return false;
 		}
-		createOrUpdate(l,task);
-		return true;
+		
+		StockInfo stockInfo = new StockInfo();
+		stockInfo.setCode(task.getInfo().get("code").toString());
+		stockInfo.setSc(l);
+		int cnt = stockDataService.siUpdateOrInsert(stockInfo, false);
+		return cnt == 1;
 	}
-	public boolean createOrUpdate(Long l,CatchTask task){
-		  StockInfo old = stockInfoService.selectOne((String)task.getInfoValue("code"));
-		  if(old!=null){
-			  StockInfo si = new StockInfo();
-			  si.setCode(old.getCode());
-			  si.setSc(l);
-			  stockInfoService.updateSelective(si);
-		  }
-		  return true;
-	}
+	
 }

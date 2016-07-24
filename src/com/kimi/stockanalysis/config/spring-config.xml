@@ -20,7 +20,7 @@
 	<!-- <context:component-scan base-package="com.kimi.stockanalysis*"></context:component-scan> -->
 
 	<!-- 环境变量配置加载 -->
-	<context:property-placeholder location="classpath:com/kimi/stockanalysis/config/jdbc.properties"/>
+	<context:property-placeholder location="classpath:com/kimi/stockanalysis/config/app-config.properties"/>
 
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
 	    <property name="driverClassName" value="${jdbc.driverClassName}" />
@@ -47,14 +47,8 @@
         <property name="sqlSession" ref="sqlSession"></property>
     </bean>
     
-    <bean id="stockInfoService"
-        class="com.kimi.stockanalysis.service.StockInfoService">
-        <property name="stockInfoDao" ref="stockInfoDao"></property>
-    </bean>
-    
-    <bean id="financailStatementService"
-        class="com.kimi.stockanalysis.service.FinancailStatementService">
-        <property name="financailStatementDao" ref="financailStatementDao"></property>
+    <bean id="stockDataService"
+        class="com.kimi.stockanalysis.service.StockDataService">
     </bean>
     
     <bean id="taskGenerateService"
@@ -65,17 +59,14 @@
     
     <bean id="financailStatementCatcher"
         class="com.kimi.stockanalysis.catcher.FinancailStatementCatcher">
-        <property name="financailStatementService" ref="financailStatementService"></property>
     </bean>
     
     <bean id="stockInfoCatcher"
         class="com.kimi.stockanalysis.catcher.StockInfoCatcher">
-        <property name="stockInfoService" ref="stockInfoService"></property>
     </bean>
     
     <bean id="stockInfoDetailCatcher"
         class="com.kimi.stockanalysis.catcher.StockInfoDetailCatcher">
-        <property name="stockInfoService" ref="stockInfoService"></property>
     </bean>
     
     <bean id="stockRealtimePriceCatcher"

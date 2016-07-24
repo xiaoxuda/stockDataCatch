@@ -25,16 +25,24 @@ import com.kimi.stockanalysis.catcher.StockRealtimePriceCatcher;
  *
  */
 public class CatcherManageService {
+	
 	public static final Logger LOGGER = LoggerFactory.getLogger(CatcherManageService.class);
+	
 	@Autowired
 	private StockInfoCatcher stockInfoCatcher;
+	
 	@Autowired
 	private StockInfoDetailCatcher stockInfoDetailCatcher;
+	
 	@Autowired
 	private FinancailStatementCatcher financailStatementCatcher;
+	
 	@Autowired
 	private StockRealtimePriceCatcher stockRealtimePriceCatcher;
-
+	
+	//爬虫检测时间间隔
+	private Long checkTimeGap = 10*1000L;
+	
 	private Map<String, BaseCatcher> catcherMap = new HashMap<String, BaseCatcher>();
 
 	@PostConstruct
@@ -44,9 +52,6 @@ public class CatcherManageService {
 		catcherMap.put(stockInfoDetailCatcher.getTaskkey(), stockInfoDetailCatcher);
 		catcherMap.put(financailStatementCatcher.getTaskkey(), financailStatementCatcher);
 		catcherMap.put(stockRealtimePriceCatcher.getTaskkey(), stockRealtimePriceCatcher);
-
-		// 启用爬虫监控
-		catcherMonitor();
 	}
 
 	/**
@@ -64,19 +69,19 @@ public class CatcherManageService {
 	}
 
 	/**
-	 * 爬虫监控,每隔五分钟按任务类型读取任务队列，唤醒/重启对应的爬虫
+	 * 爬虫监控,按任务类型读取任务队列，唤醒/重启对应的爬虫
 	 */
-	public void catcherMonitor() {
+	public void startCatcherMonitor() {
 		Thread thread = new Thread("catcherMonitor") {
 			@Override
 			public void run() {
 				while (true) {
 					catcherStateCheck();
 					try {
-						Thread.sleep(5*60*1000L);
+						Thread.sleep(checkTimeGap);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+						LOGGER.error("catcherMonitor,异常信息{}", e.getMessage());
 					}
 				}
 			}
@@ -85,7 +90,7 @@ public class CatcherManageService {
 	}
 
 	/**
-	 * 唤醒或者重启爬虫任务
+	 * 重启爬虫任务,暂时没有实现睡眠唤醒功能
 	 */
 	public void catcherStateCheck(){
 		for(String key:TaskQueueService.getKeySet()){
