@@ -27,12 +27,13 @@ public class FinancailStatementCatcher extends BaseCatcher{
 	@Override
 	public boolean extract(String src,CatchTask task){
 		if(src==null || src=="" || src.contains("该品种暂无此项记录!")){
-			LOGGER.error("TaskType:"+task.getType()+" param:"+task.getInfo()+" info:抓取财务报表失败！");
+			LOGGER.error("TaskType:{} param:{},抓取财务报表失败！",task.getType(), task.getInfo());
 			return false;
 		}
 		int start=src.indexOf("<table id=\"tablefont\"");
 		int end=src.indexOf("<table id=\"fixedtableheader\"");
 		if(start==-1 || end==-1){
+			LOGGER.error("TaskType:{} param:{},抓取财务报表失败！",task.getType(), task.getInfo());
 			return false;
 		}
 		String table=src.substring(start, end);
@@ -81,7 +82,8 @@ public class FinancailStatementCatcher extends BaseCatcher{
 				result=Double.valueOf(s.isEmpty()?"0":s);
 			}
 		}catch(Exception e){
-			LOGGER.error("异常信息{}", e.getMessage());
+			e.printStackTrace();
+			LOGGER.error("【{}】解析异常{}", s, e.getMessage());
 		}
 		return result;
 	}
