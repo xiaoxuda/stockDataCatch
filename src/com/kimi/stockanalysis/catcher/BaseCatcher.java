@@ -65,8 +65,8 @@ public abstract class BaseCatcher {
 	 */
 	@PostConstruct
 	public void init() {
-		executor.allowCoreThreadTimeOut(true);
 		executor.setKeepAliveTime(5*60*1000L, TimeUnit.SECONDS);
+		executor.allowCoreThreadTimeOut(true);
 		this.customExecutor();
 	}
 
