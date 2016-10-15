@@ -1,22 +1,19 @@
 /**
  * 
  */
-package com.kimi.stockanalysis.service;
+package com.kimi.stockanalysis.catcher.service;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import com.kimi.stockanalysis.catcher.BaseCatcher;
-import com.kimi.stockanalysis.catcher.FinancailStatementCatcher;
-import com.kimi.stockanalysis.catcher.StockInfoCatcher;
-import com.kimi.stockanalysis.catcher.StockInfoDetailCatcher;
-import com.kimi.stockanalysis.catcher.StockRealtimePriceCatcher;
 
 /**
  * 爬虫管理器
@@ -24,36 +21,32 @@ import com.kimi.stockanalysis.catcher.StockRealtimePriceCatcher;
  * @author kimi
  *
  */
-public class CatcherManageService {
+public class CatcherManageService implements ApplicationContextAware{
 	
-	public static final Logger LOGGER = LoggerFactory.getLogger(CatcherManageService.class);
-	
-	@Autowired
-	private StockInfoCatcher stockInfoCatcher;
-	
-	@Autowired
-	private StockInfoDetailCatcher stockInfoDetailCatcher;
-	
-	@Autowired
-	private FinancailStatementCatcher financailStatementCatcher;
-	
-	@Autowired
-	private StockRealtimePriceCatcher stockRealtimePriceCatcher;
+	public final Logger LOGGER = LoggerFactory.getLogger(CatcherManageService.class);
 	
 	//爬虫检测时间间隔
 	private Long checkTimeGap = 10*1000L;
 	
 	private Map<String, BaseCatcher> catcherMap = new HashMap<String, BaseCatcher>();
 
-	@PostConstruct
-	public void postContruct() {
-		// 爬虫注册
-		catcherMap.put(stockInfoCatcher.getTaskkey(), stockInfoCatcher);
-		catcherMap.put(stockInfoDetailCatcher.getTaskkey(), stockInfoDetailCatcher);
-		catcherMap.put(financailStatementCatcher.getTaskkey(), financailStatementCatcher);
-		catcherMap.put(stockRealtimePriceCatcher.getTaskkey(), stockRealtimePriceCatcher);
+	@Autowired
+	private TaskQueueService taskQueueService;
+	
+	/**
+	 * 自动注册已设置的爬虫
+	 */
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		// TODO Auto-generated method stub
+		Map<String,BaseCatcher> beansMap = applicationContext.getBeansOfType(BaseCatcher.class);
+		if(beansMap != null && beansMap.size()>0){
+			for(BaseCatcher catcher:beansMap.values()){
+				catcherMap.put(catcher.getTaskkey(), catcher);
+			}
+		}
 	}
-
+	
 	/**
 	 * 启动已注册的爬虫
 	 * 
@@ -93,7 +86,7 @@ public class CatcherManageService {
 	 * 重启爬虫任务,暂时没有实现睡眠唤醒功能
 	 */
 	public void catcherStateCheck(){
-		for(String key:TaskQueueService.getKeySet()){
+		for(String key:taskQueueService.getKeySet()){
 			startCatcher(key);
 		}
 	}
@@ -110,4 +103,5 @@ public class CatcherManageService {
 			catcher.start();
 		}
 	}
+
 }

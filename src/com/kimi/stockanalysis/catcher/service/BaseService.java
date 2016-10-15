@@ -1,4 +1,4 @@
-package com.kimi.stockanalysis.service;
+package com.kimi.stockanalysis.catcher.service;
 
 import java.util.List;
 

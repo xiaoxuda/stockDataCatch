@@ -9,9 +9,9 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.kimi.stockanalysis.catcher.enums.TaskTypeEnum;
+import com.kimi.stockanalysis.catcher.service.CatchTask;
 import com.kimi.stockanalysis.entity.StockInfo;
-import com.kimi.stockanalysis.enums.TaskTypeEnum;
-import com.kimi.stockanalysis.service.CatchTask;
 import com.kimi.stockanalysis.service.StockDataService;
 /*
  * @author kimi
@@ -46,15 +46,15 @@ public class StockInfoCatcher extends BaseCatcher{
 	}
 	
 	@Override
-	protected boolean extract(String src,CatchTask task){
+	public boolean extract(String src,CatchTask task){
 		if(src==null || src==""){
-			LOGGER.error("抓取公司列表失败,TaskType:{},param:{}",task.getType(), task.getInfo());
+			LOGGER.error("抓取公司列表失败,TaskType:{},param:{}",task.getType(), task);
 			return false;
 		}
 		int start=src.indexOf("<div class=\"list-ct\">");
 		int end=StringUtils.indexOf(src, "</div></div><div class=\"clear\">", start);
 		if(start==-1 || end==-1){
-			LOGGER.error("抓取公司列表失败,TaskType:{},param:{}",task.getType(), task.getInfo());
+			LOGGER.error("抓取公司列表失败,TaskType:{},param:{}",task.getType(), task);
 			return false;
 		}
 		//需要使用webclient

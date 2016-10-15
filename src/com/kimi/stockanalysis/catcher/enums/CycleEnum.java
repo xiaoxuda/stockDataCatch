@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.kimi.stockanalysis.enums;
+package com.kimi.stockanalysis.catcher.enums;
 
 import java.util.Date;
 
@@ -15,7 +15,9 @@ import org.apache.commons.lang.StringUtils;
 public enum CycleEnum {
 	HOUR("hour","小时",60*60*1000L),
 	DAY("day","天",24*60*60*1000L),
-	WEEK("week","周",7*24*60*60*1000L);
+	WEEK("week","周",7*24*60*60*1000L),
+	MONTH("month","月",30*7*24*60*60*1000L),
+	QUARTER("quarter","季度",3*7*24*60*60*1000L);
 	
 	private String code;
 	private String desc;

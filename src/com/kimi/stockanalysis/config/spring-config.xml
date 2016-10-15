@@ -37,7 +37,28 @@
 	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
 	  <constructor-arg index="0" ref="sqlSessionFactory" />
 	</bean>
+	
+    <!-- enable the configuration of transactional behavior based on annotations -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- (this dependency is defined somewhere else) -->
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    
+    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+    	<property name="transactionManager" ref="transactionManager"/>
+    	<property name="isolationLevel" value="2"/>
+    	<property name="propagationBehavior" value="0"/>
+    	<property name="timeout" value="180"/>
+    </bean>
+    
+    <bean id="transactionTemplateNew" class="org.springframework.transaction.support.TransactionTemplate">
+    	<property name="transactionManager" ref="transactionManager"/>
+    	<property name="isolationLevel" value="2"/>
+    	<property name="propagationBehavior" value="3"/>
+    	<property name="timeout" value="180"/>
+    </bean>
 
+	<!-- dao start -->
     <bean id="financailStatementDao"
         class="com.kimi.stockanalysis.dao.FinancailStatementDao">
         <property name="sqlSession" ref="sqlSession"></property>
@@ -47,20 +68,29 @@
         <property name="sqlSession" ref="sqlSession"></property>
     </bean>
     
+    <bean id="dailyTradeDetailDao"
+        class="com.kimi.stockanalysis.dao.DailyTradeDetailDao">
+        <property name="sqlSession" ref="sqlSession"></property>
+    </bean>
+    
+    <!-- dao end -->
+    
+    <!-- service start -->
     <bean id="stockDataService"
         class="com.kimi.stockanalysis.service.StockDataService">
     </bean>
     
     <bean id="taskGenerateService"
-    	class="com.kimi.stockanalysis.service.TaskGenerateService"></bean>
+    	class="com.kimi.stockanalysis.catcher.service.TaskGenerateService"></bean>
     
    	<bean id="catcherManageService"
-    	class="com.kimi.stockanalysis.service.CatcherManageService"></bean>
+    	class="com.kimi.stockanalysis.catcher.service.CatcherManageService"></bean>
     
-    <bean id="financailStatementCatcher"
-        class="com.kimi.stockanalysis.catcher.FinancailStatementCatcher">
-    </bean>
+    <bean id="taskQueueService" 
+    	class="com.kimi.stockanalysis.catcher.service.TaskQueueService"></bean>
+    <!-- service end -->
     
+    <!-- catcher start -->
     <bean id="stockInfoCatcher"
         class="com.kimi.stockanalysis.catcher.StockInfoCatcher">
     </bean>
@@ -69,7 +99,17 @@
         class="com.kimi.stockanalysis.catcher.StockInfoDetailCatcher">
     </bean>
     
-    <bean id="stockRealtimePriceCatcher"
-        class="com.kimi.stockanalysis.catcher.StockRealtimePriceCatcher">
+    <bean id="stockRealtimeTradeCatcher"
+        class="com.kimi.stockanalysis.catcher.StockRealtimeTradeCatcher">
     </bean>
+    
+    <bean id="historyTradeDetailCatcher"
+        class="com.kimi.stockanalysis.catcher.HistoryTradeDetailCatcher">
+    </bean>
+    
+    <bean id="financailStatementCatcher"
+        class="com.kimi.stockanalysis.catcher.FinancailStatementCatcher">
+    </bean>
+    
+    <!-- catcher end -->
 </beans>

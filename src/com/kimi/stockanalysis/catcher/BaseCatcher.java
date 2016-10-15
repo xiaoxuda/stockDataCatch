@@ -14,9 +14,11 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionTemplate;
 
-import com.kimi.stockanalysis.service.CatchTask;
-import com.kimi.stockanalysis.service.TaskQueueService;
+import com.kimi.stockanalysis.catcher.service.CatchTask;
+import com.kimi.stockanalysis.catcher.service.TaskQueueService;
 
 /*
  * @author kimi
@@ -25,9 +27,16 @@ public abstract class BaseCatcher {
 	/** 为每个子类提供一个区别化的日志类 **/
 	protected final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 	
-	/** 线程池，子类只能通过覆盖入口方法修改部分属性，核心默认三个线程 **/
+	/** 事务 **/
+	@Autowired
+	protected TransactionTemplate transactionTemplate;
+	
+	@Autowired
+	private TaskQueueService taskQueueService;
+	
+	/** 线程池，子类只能通过覆盖入口方法修改部分属性，核心默认6个线程 **/
 	private final ThreadPoolExecutor executor = 
-			(ThreadPoolExecutor) Executors.newFixedThreadPool(3);
+			(ThreadPoolExecutor) Executors.newFixedThreadPool(6);
 
 	private boolean isRunning = false; // 标识任务正在运行
 	private int defaultWaitTime = 1000; // 默认抓取间隔
@@ -37,7 +46,7 @@ public abstract class BaseCatcher {
 	private int againTime = 5; // 异常重试次数
 
 	/**
-	 * 子类可以通过重载此方法来定制化工作线程池
+	 * 子类可以通过重载此方法调用customExecutor来定制化工作线程池
 	 */
 	public void customExecutor() {
 	}
@@ -77,7 +86,7 @@ public abstract class BaseCatcher {
 	 * @param task 任务信息
 	 * @return
 	 */
-	protected abstract boolean extract(String src, CatchTask task);
+	public abstract boolean extract(String src, CatchTask task);
 
 	/**
 	 * 返回任务关键字，不能为空，需要爬虫具体实现
@@ -85,7 +94,7 @@ public abstract class BaseCatcher {
 	 * @author kimi
 	 * @return 返回值不能为空
 	 */
-	protected abstract String getTaskkey();
+	public abstract String getTaskkey();
 
 	/**
 	 * 判断爬虫是否处于运行中
@@ -106,13 +115,13 @@ public abstract class BaseCatcher {
 		Thread thread_catcher = new Thread(getTaskkey() + "_Catcher") {
 			public void run() {
 				while (true) {
-					CatchTask task = TaskQueueService.getTask(getTaskkey());
+					CatchTask task = taskQueueService.getTask(getTaskkey());
 					try {
 						if (task == null) {// 当前没有任务，将抓取间隔调高waitMultiplier倍让出CPU资源
 							LOGGER.info("{}:no task", getTaskkey());
 
 							if (waitTime == maxWaitTime) {
-								LOGGER.info("{}:等待任务时间超时，爬虫退出，等待重新唤起。", getTaskkey());
+								LOGGER.info("{}等待任务时间超时，爬虫退出，等待重新唤起。", getTaskkey());
 								break;
 							}
 							waitTime *= waitMultiplier;
@@ -130,7 +139,7 @@ public abstract class BaseCatcher {
 						Thread.sleep(waitTime);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
-						LOGGER.error("任务{},异常信息{}", task, e.getMessage());
+						LOGGER.error("任务{}异常", task, e);
 					}
 				}
 				isRunning = false;
@@ -150,7 +159,7 @@ public abstract class BaseCatcher {
 	 *            失败重试次数
 	 * @return
 	 */
-	public String catchAction(CatchTask task, int againTime) {
+	public String catchAction(CatchTask task, int nowAgainTime) {
 		try {
 			URL url = new URL(task.getUrl());
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -166,10 +175,10 @@ public abstract class BaseCatcher {
 			extract(builder.toString(), task);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			LOGGER.error("任务{},异常信息{}", task, e.getMessage());
+			LOGGER.error("任务{}异常", task, e);
 			// 异常重试
-			if (againTime > 0) {
-				catchAction(task, againTime - 1);
+			if (nowAgainTime <= againTime) {
+				catchAction(task, ++nowAgainTime);
 			} else {
 				LOGGER.info("任务重试超过{}次，重新放回任务队列等待调度，参数{}", againTime, task);
 			}
@@ -195,4 +204,20 @@ public abstract class BaseCatcher {
 			catchAction(this.task, againTime);
 		}
 	}
+
+	/**
+	 * @return the transactionTemplate
+	 */
+	public TransactionTemplate getTransactionTemplate() {
+		return transactionTemplate;
+	}
+
+	/**
+	 * @param transactionTemplate the transactionTemplate to set
+	 */
+	public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+		this.transactionTemplate = transactionTemplate;
+	}
+	
+	
 }

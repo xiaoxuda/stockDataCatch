@@ -1,8 +1,11 @@
-package com.kimi.stockanalysis.service;
+package com.kimi.stockanalysis.catcher.service;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 public class CatchTask implements Serializable{
 	private static final long serialVersionUID = 6388382222106508105L;
@@ -44,5 +47,10 @@ public class CatchTask implements Serializable{
 	
 	public void setInfo(Map<String,Object> info){
 		this.info = info;
+	}
+	
+	@Override
+	public String toString(){
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 }

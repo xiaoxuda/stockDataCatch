@@ -5,6 +5,11 @@
 
 <!-- 自定义数据库操作	-->
 <mapper namespace="com.kimi.stockanalysis.dao.StockInfoDao">
-
+	<select id="fuzzySearchByCodeOrName" resultType="com.kimi.stockanalysis.entity.StockInfo">
+		SELECT <include refid="columnMap"></include>
+		FROM stock_info
+		WHERE code like CONCAT('%',#{keyword},'%') OR name like CONCAT('%',#{keyword},'%')
+		LIMIT #{index}, #{pageSize};
+	</select>
 </mapper>
 

@@ -5,6 +5,15 @@
 
 <!-- 数据库基本操作 -->
 <mapper namespace="com.kimi.stockanalysis.dao.StockInfoDao">
+	<sql id="columnMap">
+        	code as code,
+        	type as type,
+        	name as name,
+        	sc as sc,
+        	price as price,
+        	modify_time as modifyTime
+	</sql>
+
     <insert id="insert" parameterType="com.kimi.stockanalysis.entity.StockInfo">
         INSERT INTO `stock_info` (
         	code ,
@@ -55,14 +64,14 @@
     </update>
 	
     <select id="selectOne" resultType="com.kimi.stockanalysis.entity.StockInfo">
-        SELECT *
+        SELECT <include refid="columnMap"></include>
 		FROM `stock_info`
         WHERE 
 	        code = #{code} 
     </select>
 	
     <select id="selectList" resultType="com.kimi.stockanalysis.entity.StockInfo">
-        SELECT *
+        SELECT <include refid="columnMap"></include>
 		FROM `stock_info`
         WHERE 1=1
 	        <if test="code!=null" > AND code = #{code}</if>

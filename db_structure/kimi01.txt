@@ -36,6 +36,18 @@ CREATE TABLE `stock_info` (
   `price` float(6,2) DEFAULT '0.00' COMMENT '当前价格',
   `modify_time` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '最后修改时间',
   PRIMARY KEY (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `daily_trade_detail` (
+  `code` varchar(8) NOT NULL COMMENT '股票代码',
+  `date` varchar(16) NOT NULL COMMENT '交易日期:yyyy-MM-dd',
+  `start_price` float(8,2) DEFAULT NULL COMMENT '开盘价格',
+  `max_price` float(8,2) DEFAULT NULL COMMENT '最高价格',
+  `min_price` float(8,2) DEFAULT NULL COMMENT '最低价格',
+  `end_price` float(8,2) DEFAULT NULL COMMENT '收盘价格',
+  `trade_volume` bigint(16) DEFAULT NULL COMMENT '交易量（股）',
+  `trade_amt` double(16,2) DEFAULT NULL COMMENT '交易金额',
+  PRIMARY KEY (`code`,`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 

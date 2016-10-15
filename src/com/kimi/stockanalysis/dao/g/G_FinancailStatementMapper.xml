@@ -5,6 +5,35 @@
 
 <!-- 数据库基本操作 -->
 <mapper namespace="com.kimi.stockanalysis.dao.FinancailStatementDao">
+	<sql id="columnMap">
+        	code as code,
+        	date as date,
+        	pe as pe,
+        	bvps as bvps,
+        	cps as cps,
+        	roe as roe,
+        	jroe as jroe,
+        	sgpr as sgpr,
+        	smpr as smpr,
+        	dtar as dtar,
+        	opgr as opgr,
+        	toi as toi,
+        	toc as toc,
+        	oi as oi,
+        	oc as oc,
+        	op as op,
+        	tp as tp,
+        	mp as mp,
+        	mpbpc as mpbpc,
+        	ta as ta,
+        	tl as tl,
+        	se as se,
+        	tacf as tacf,
+        	iacf as iacf,
+        	facf as facf,
+        	cnca as cnca
+	</sql>
+
     <insert id="insert" parameterType="com.kimi.stockanalysis.entity.FinancailStatement">
         INSERT INTO `financail_statement` (
         	code ,
@@ -137,7 +166,7 @@
     </update>
 	
     <select id="selectOne" resultType="com.kimi.stockanalysis.entity.FinancailStatement">
-        SELECT *
+        SELECT <include refid="columnMap"></include>
 		FROM `financail_statement`
         WHERE 
 	        code = #{code}  And 
@@ -145,7 +174,7 @@
     </select>
 	
     <select id="selectList" resultType="com.kimi.stockanalysis.entity.FinancailStatement">
-        SELECT *
+        SELECT <include refid="columnMap"></include>
 		FROM `financail_statement`
         WHERE 1=1
 	        <if test="code!=null" > AND code = #{code}</if>

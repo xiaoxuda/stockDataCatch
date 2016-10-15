@@ -1,71 +1,91 @@
 ﻿
 package com.kimi.stockanalysis.entity;
 
+import java.io.Serializable;
 /**
  * @author kimi
  */
-public class FinancailStatement implements java.io.Serializable {
+public class FinancailStatement implements Serializable {
 	private static final long serialVersionUID = 5454155825314635342L;
 	
-	//alias
-	public static final String TABLE_ALIAS = "FinancailStatement";
-	public static final String ALIAS_CODE = "股票代码";
-	public static final String ALIAS_DATE = "报告日期，格式yyyy-MM-dd";
-	public static final String ALIAS_PE = "每股收益";
-	public static final String ALIAS_BVPS = "每股净资产";
-	public static final String ALIAS_CPS = "每股现金流";
-	public static final String ALIAS_ROE = "净资产收益率";
-	public static final String ALIAS_JROE = "总资产净利率";
-	public static final String ALIAS_SGPR = "销售毛利率";
-	public static final String ALIAS_SMPR = "销售净利率";
-	public static final String ALIAS_DTAR = "资产负债率";
-	public static final String ALIAS_OPGR = "同比净利润增长率";
-	public static final String ALIAS_TOI = "营业总收入";
-	public static final String ALIAS_TOC = "营业总成本";
-	public static final String ALIAS_OI = "营业收入";
-	public static final String ALIAS_OC = "营业成本";
-	public static final String ALIAS_OP = "营业利润";
-	public static final String ALIAS_TP = "利润总额";
-	public static final String ALIAS_MP = "净利润";
-	public static final String ALIAS_MPBPC = "归属母公司的净利润";
-	public static final String ALIAS_TA = "总资产";
-	public static final String ALIAS_TL = "负债总额";
-	public static final String ALIAS_SE = "股东权益";
-	public static final String ALIAS_TACF = "经营活动产生的现金流";
-	public static final String ALIAS_IACF = "投资活动产生的现金流";
-	public static final String ALIAS_FACF = "筹资活动产生的现金流";
-	public static final String ALIAS_CNCA = "现金及等价物净增加";
-	
-	//date formats
-	
-	//columns START
+	/** 股票代码 **/
 	private java.lang.String code;
+	
+	/** 报告日期，格式yyyy-MM-dd **/
 	private java.lang.String date;
+	
+	/** 每股收益 **/
 	private java.lang.Double pe;
+	
+	/** 每股净资产 **/
 	private java.lang.Double bvps;
+	
+	/** 每股现金流 **/
 	private java.lang.Double cps;
+	
+	/** 净资产收益率 **/
 	private java.lang.Double roe;
+	
+	/** 总资产净利率 **/
 	private java.lang.Double jroe;
+	
+	/** 销售毛利率 **/
 	private java.lang.Double sgpr;
+	
+	/** 销售净利率 **/
 	private java.lang.Double smpr;
+	
+	/** 资产负债率 **/
 	private java.lang.Double dtar;
+	
+	/** 同比净利润增长率 **/
 	private java.lang.Double opgr;
+	
+	/** 营业总收入 **/
 	private java.lang.Double toi;
+	
+	/** 营业总成本 **/
 	private java.lang.Double toc;
+	
+	/** 营业收入 **/
 	private java.lang.Double oi;
+	
+	/** 营业成本 **/
 	private java.lang.Double oc;
+	
+	/** 营业利润 **/
 	private java.lang.Double op;
+	
+	/** 利润总额 **/
 	private java.lang.Double tp;
+	
+	/** 净利润 **/
 	private java.lang.Double mp;
+	
+	/** 归属母公司的净利润 **/
 	private java.lang.Double mpbpc;
+	
+	/** 总资产 **/
 	private java.lang.Double ta;
+	
+	/** 负债总额 **/
 	private java.lang.Double tl;
+	
+	/** 股东权益 **/
 	private java.lang.Double se;
+	
+	/** 经营活动产生的现金流 **/
 	private java.lang.Double tacf;
+	
+	/** 投资活动产生的现金流 **/
 	private java.lang.Double iacf;
+	
+	/** 筹资活动产生的现金流 **/
 	private java.lang.Double facf;
+	
+	/** 现金及等价物净增加 **/
 	private java.lang.Double cnca;
-	//columns END
+	
 
 	public FinancailStatement(){
 	}
@@ -265,8 +285,32 @@ public class FinancailStatement implements java.io.Serializable {
     @Override
     public String toString() {
         return "FinancailStatement{" +
-				 "code=" + code +  "," +
-				 "date=" + date + 
+				 "code=" + this.code +  "," +
+				 "date=" + this.date +  "," +
+				 "pe=" + this.pe +  "," +
+				 "bvps=" + this.bvps +  "," +
+				 "cps=" + this.cps +  "," +
+				 "roe=" + this.roe +  "," +
+				 "jroe=" + this.jroe +  "," +
+				 "sgpr=" + this.sgpr +  "," +
+				 "smpr=" + this.smpr +  "," +
+				 "dtar=" + this.dtar +  "," +
+				 "opgr=" + this.opgr +  "," +
+				 "toi=" + this.toi +  "," +
+				 "toc=" + this.toc +  "," +
+				 "oi=" + this.oi +  "," +
+				 "oc=" + this.oc +  "," +
+				 "op=" + this.op +  "," +
+				 "tp=" + this.tp +  "," +
+				 "mp=" + this.mp +  "," +
+				 "mpbpc=" + this.mpbpc +  "," +
+				 "ta=" + this.ta +  "," +
+				 "tl=" + this.tl +  "," +
+				 "se=" + this.se +  "," +
+				 "tacf=" + this.tacf +  "," +
+				 "iacf=" + this.iacf +  "," +
+				 "facf=" + this.facf +  "," +
+				 "cnca=" + this.cnca + 
                 '}';
     }	
 	@Override

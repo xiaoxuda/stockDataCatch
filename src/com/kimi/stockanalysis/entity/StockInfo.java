@@ -1,39 +1,40 @@
 ﻿
 package com.kimi.stockanalysis.entity;
 
+import java.io.Serializable;
 import java.text.ParseException;
 
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.apache.commons.lang.time.DateUtils;
-
 /**
  * @author kimi
  */
-public class StockInfo implements java.io.Serializable {
+public class StockInfo implements Serializable {
 	private static final long serialVersionUID = 5454155825314635342L;
 	
-	//alias
-	public static final String TABLE_ALIAS = "StockInfo";
-	public static final String ALIAS_CODE = "股票交易代码";
-	public static final String ALIAS_TYPE = "股票类型：01沪市主板，02深市主板";
-	public static final String ALIAS_NAME = "股票名称";
-	public static final String ALIAS_SC = "股本数量";
-	public static final String ALIAS_PRICE = "当前价格";
-	public static final String ALIAS_MODIFY_TIME = "最后修改时间";
-
 	private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 	
 	//date formats
 	public static final String FORMAT_MODIFY_TIME = DATE_TIME_FORMAT;
 	
-	//columns START
+	/** 股票交易代码 **/
 	private java.lang.String code;
+	
+	/** 股票类型：01沪市主板，02深市主板 **/
 	private java.lang.String type;
+	
+	/** 股票名称 **/
 	private java.lang.String name;
+	
+	/** 股本数量 **/
 	private java.lang.Long sc;
+	
+	/** 当前价格 **/
 	private java.lang.Float price;
+	
+	/** 最后修改时间 **/
 	private java.util.Date modifyTime;
-	//columns END
+	
 
 	public StockInfo(){
 	}
@@ -102,12 +103,12 @@ public class StockInfo implements java.io.Serializable {
     @Override
     public String toString() {
         return "StockInfo{" +
-				 "code=" + code +  "," +
-				 "type=" + type +  "," +
-				 "name=" + name +  "," +
-				 "sc=" + sc +  "," +
-				 "price=" + price +  "," +
-				 "modifyTime=" + modifyTime + 
+				 "code=" + this.code +  "," +
+				 "type=" + this.type +  "," +
+				 "name=" + this.name +  "," +
+				 "sc=" + this.sc +  "," +
+				 "price=" + this.price +  "," +
+				 "modifyTime=" + this.modifyTime + 
                 '}';
     }	
 	@Override

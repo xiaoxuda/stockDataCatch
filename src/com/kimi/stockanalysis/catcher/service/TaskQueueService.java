@@ -1,4 +1,4 @@
-package com.kimi.stockanalysis.service;
+package com.kimi.stockanalysis.catcher.service;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,17 +17,31 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class TaskQueueService {
-	private static Logger LOGGER = LoggerFactory.getLogger(TaskQueueService.class);
+	private final Logger LOGGER = LoggerFactory.getLogger(TaskQueueService.class);
 	
-	private static Map<String, ArrayBlockingQueue<CatchTask>> queueMap = 
+	//FIXME 考虑将任务落入数据库，避免停机引起的任务丢失
+	private final Map<String, ArrayBlockingQueue<CatchTask>> queueMap = 
 			new HashMap<String, ArrayBlockingQueue<CatchTask>>();
 
+	private boolean validTask(CatchTask task){
+		if(null == task){
+			return false;
+		}
+		if(StringUtils.isBlank(task.getUrl()) || StringUtils.isBlank(task.getType())){
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * 提交任务
 	 * 
 	 * @param task 任务实体
 	 */
-	public static void commitTask(CatchTask task) {
+	public void commitTask(CatchTask task) {
+		//任务校验
+		assert(validTask(task));
+		
 		try {
 			ArrayBlockingQueue<CatchTask> taskqueue = queueMap.get(task.getType());
 			if (taskqueue != null) {
@@ -48,7 +63,7 @@ public class TaskQueueService {
 	 * @param key
 	 * @return
 	 */
-	public static CatchTask getTask(String key) {
+	public CatchTask getTask(String key) {
 		ArrayBlockingQueue<CatchTask> taskqueue = queueMap.get(key);
 		if (taskqueue != null) {
 			return taskqueue.poll();
@@ -58,11 +73,11 @@ public class TaskQueueService {
 	}
 
 	/**
-	 * 获取当前任务类型集合，排除没有任务的队列
+	 * 获取当前任务类型集合，返回结果中排除了没有任务的类型
 	 * 
 	 * @return
 	 */
-	public static Set<String> getKeySet() {
+	public Set<String> getKeySet() {
 		Set<String> taskQueue = new HashSet<String>();
 		for (String type : queueMap.keySet()) {
 			if (queueMap.get(type).size() > 0) {
