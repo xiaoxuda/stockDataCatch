@@ -54,12 +54,12 @@ public class TaskGenerateService {
 			public void run() {
 				while (true) {
 					if (isContinue) {
-						commitStockInfoTask();
-						commitDetailInfoTask();
-						commitFinancailStatementTask();
+						//commitStockInfoTask();
+						//commitDetailInfoTask();
+						//commitFinancailStatementTask();
 						commitPriceInfoTask();
 						//默认抓取最近五个季度的交易详情
-						commitHistoryTradeDetailInfoTask(1);
+						//commitHistoryTradeDetailInfoTask(1);
 					}
 
 					try {
