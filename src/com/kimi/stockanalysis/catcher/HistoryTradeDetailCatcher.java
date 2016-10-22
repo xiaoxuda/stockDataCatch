@@ -5,6 +5,8 @@ package com.kimi.stockanalysis.catcher;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import com.kimi.stockanalysis.catcher.enums.TaskTypeEnum;
 import com.kimi.stockanalysis.catcher.service.CatchTask;
 import com.kimi.stockanalysis.entity.DailyTradeDetail;
+import com.kimi.stockanalysis.entity.StockInfo;
 import com.kimi.stockanalysis.service.StockDataService;
 
 /**
@@ -87,11 +90,36 @@ public class HistoryTradeDetailCatcher extends BaseCatcher {
 		return true;
 	}
 	/* (non-Javadoc)
-	 * @see com.kimi.stockanalysis.catcher.BaseCatcher#getTaskkey()
+	 * @see com.kimi.stockanalysis.catcher.BaseCatcher#getTaskType()
 	 */
 	@Override
-	public String getTaskkey() {
+	public TaskTypeEnum getTaskType() {
 		// TODO Auto-generated method stub
-		return TaskTypeEnum.SINAJS_HISTORY_TRADE_DETAIL.getCode();
+		return TaskTypeEnum.SINAJS_HISTORY_TRADE_DETAIL;
+	}
+
+	@Override
+	public CatchTask generateTask(StockInfo stockInfo) {
+		//获取当前年份和季度
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		int year = calendar.get(Calendar.YEAR);
+		int quarter = (int) Math.ceil((calendar.get(Calendar.MONTH) + 1)/3.0);
+		
+		//获取上一个季度
+		--quarter;
+		//上年第四季度
+		if(quarter == 0){
+			year -= 1;
+			quarter = 4;
+		}
+		CatchTask task = new CatchTask();
+		task.setType(this.getTaskType().getCode());
+		task.setUrl(
+				String.format("http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/%s.phtml?year=%s&jidu=%s"
+						,stockInfo.getCode(), year , quarter));
+		task.addInfo("code", stockInfo.getCode());
+		task.addInfo("type", stockInfo.getType());
+		return task;
 	}
 }

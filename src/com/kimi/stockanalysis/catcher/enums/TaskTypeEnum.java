@@ -50,5 +50,13 @@ public enum TaskTypeEnum {
 		return cycle;
 	}
 	
-	
+	public static TaskTypeEnum getByCode(String code){
+		for(TaskTypeEnum type : TaskTypeEnum.values()){
+			if(type.getCode().equals(code)){
+				return type;
+			}
+		}
+		
+		return null;
+	}
 }

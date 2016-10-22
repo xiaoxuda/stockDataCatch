@@ -10,6 +10,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.kimi.stockanalysis.catcher.enums.TaskTypeEnum;
+
 /**
  * 任务队列服务
  * 
@@ -18,38 +20,41 @@ import org.slf4j.LoggerFactory;
  */
 public class TaskQueueService {
 	private final Logger LOGGER = LoggerFactory.getLogger(TaskQueueService.class);
-	
-	//FIXME 考虑将任务落入数据库，避免停机引起的任务丢失
-	private final Map<String, ArrayBlockingQueue<CatchTask>> queueMap = 
-			new HashMap<String, ArrayBlockingQueue<CatchTask>>();
 
-	private boolean validTask(CatchTask task){
-		if(null == task){
+	// FIXME 考虑将任务落入数据库，避免停机引起的任务丢失
+	private final Map<TaskTypeEnum, ArrayBlockingQueue<CatchTask>> queueMap = new HashMap<TaskTypeEnum, ArrayBlockingQueue<CatchTask>>();
+
+	private boolean validTask(CatchTask task) {
+		if (null == task) {
 			return false;
 		}
-		if(StringUtils.isBlank(task.getUrl()) || StringUtils.isBlank(task.getType())){
+		if (StringUtils.isBlank(task.getUrl()) || StringUtils.isBlank(task.getType())) {
+			return false;
+		}
+		if (TaskTypeEnum.getByCode(task.getType()) == null) {
 			return false;
 		}
 		return true;
 	}
-	
+
 	/**
 	 * 提交任务
 	 * 
-	 * @param task 任务实体
+	 * @param task
+	 *            任务实体
 	 */
-	public void commitTask(CatchTask task) {
-		//任务校验
-		assert(validTask(task));
-		
+	public void commitTask(TaskTypeEnum type, CatchTask task) {
+		// 任务校验
+		assert (validTask(task));
+
 		try {
-			ArrayBlockingQueue<CatchTask> taskqueue = queueMap.get(task.getType());
+			ArrayBlockingQueue<CatchTask> taskqueue = queueMap.get(type);
 			if (taskqueue != null) {
 				taskqueue.put(task);
 			} else {
 				taskqueue = new ArrayBlockingQueue<CatchTask>(100000, true);
 				taskqueue.put(task);
-				queueMap.put(task.getType(), taskqueue);
+				queueMap.put(type, taskqueue);
 			}
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -63,8 +68,8 @@ public class TaskQueueService {
 	 * @param key
 	 * @return
 	 */
-	public CatchTask getTask(String key) {
-		ArrayBlockingQueue<CatchTask> taskqueue = queueMap.get(key);
+	public CatchTask getTask(TaskTypeEnum type) {
+		ArrayBlockingQueue<CatchTask> taskqueue = queueMap.get(type);
 		if (taskqueue != null) {
 			return taskqueue.poll();
 		} else {
@@ -77,9 +82,9 @@ public class TaskQueueService {
 	 * 
 	 * @return
 	 */
-	public Set<String> getKeySet() {
-		Set<String> taskQueue = new HashSet<String>();
-		for (String type : queueMap.keySet()) {
+	public Set<TaskTypeEnum> getTypeSet() {
+		Set<TaskTypeEnum> taskQueue = new HashSet<TaskTypeEnum>();
+		for (TaskTypeEnum type : queueMap.keySet()) {
 			if (queueMap.get(type).size() > 0) {
 				taskQueue.add(type);
 			}

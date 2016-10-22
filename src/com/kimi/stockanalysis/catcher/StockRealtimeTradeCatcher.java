@@ -22,13 +22,13 @@ import com.kimi.stockanalysis.service.StockDataService;
  *
  */
 public class StockRealtimeTradeCatcher extends BaseCatcher {
-	
+
 	@Autowired
 	private StockDataService stockDataService;
 
 	@Override
-	public String getTaskkey() {
-		return TaskTypeEnum.SINAJS_PRICE.getCode();
+	public TaskTypeEnum getTaskType() {
+		return TaskTypeEnum.SINAJS_PRICE;
 	}
 
 	/**
@@ -52,20 +52,19 @@ public class StockRealtimeTradeCatcher extends BaseCatcher {
 			return false;
 		}
 
-		
-		transactionTemplate.execute(new TransactionCallbackWithoutResult(){
+		transactionTemplate.execute(new TransactionCallbackWithoutResult() {
 			@Override
 			protected void doInTransactionWithoutResult(TransactionStatus arg0) {
 
 				String price = StringUtils.isBlank(arr[3]) || Float.valueOf(arr[3]) == 0 ? arr[2] : arr[3];
-		
+
 				StockInfo stockInfo = new StockInfo();
 				stockInfo.setCode(task.getInfoValue("code").toString());
 				stockInfo.setPrice(Float.valueOf(price));
 				stockDataService.siUpdateOrInsert(stockInfo, false);
-		
-				//今日有交易则更新交易信息
-				if(StringUtils.isNotBlank(arr[3])){
+
+				// 今日有交易则更新交易信息
+				if (StringUtils.isNotBlank(arr[3])) {
 					DailyTradeDetail dtd = new DailyTradeDetail();
 					dtd.setCode(task.getInfoValue("code").toString());
 					dtd.setDate(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
@@ -81,5 +80,15 @@ public class StockRealtimeTradeCatcher extends BaseCatcher {
 			}
 		});
 		return true;
+	}
+
+	@Override
+	public CatchTask generateTask(StockInfo stockInfo) {
+		CatchTask task = new CatchTask();
+		task.addInfo("code", stockInfo.getCode());
+		task.addInfo("type", stockInfo.getType());
+		task.setType(this.getTaskType().getCode());
+		task.setUrl("http://hq.sinajs.cn/list=" + stockInfo.getType().substring(0, 2) + stockInfo.getCode());
+		return task;
 	}
 }

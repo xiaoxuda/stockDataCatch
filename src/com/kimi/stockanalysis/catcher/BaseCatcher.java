@@ -17,8 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import com.kimi.stockanalysis.catcher.enums.TaskTypeEnum;
 import com.kimi.stockanalysis.catcher.service.CatchTask;
 import com.kimi.stockanalysis.catcher.service.TaskQueueService;
+import com.kimi.stockanalysis.entity.StockInfo;
 
 /*
  * @author kimi
@@ -76,9 +78,17 @@ public abstract class BaseCatcher {
 	public void init() {
 		executor.setKeepAliveTime(5*60*1000L, TimeUnit.SECONDS);
 		executor.allowCoreThreadTimeOut(true);
+		//定制化扩展钩子
 		this.customExecutor();
 	}
 
+	/**
+	 * 生成爬虫任务
+	 * @param stockInfo
+	 * @return
+	 */
+	public abstract CatchTask generateTask(StockInfo stockInfo);
+	
 	/**
 	 * 数据提取及保存逻辑，需要爬虫具体实现
 	 * 
@@ -89,12 +99,12 @@ public abstract class BaseCatcher {
 	public abstract boolean extract(String src, CatchTask task);
 
 	/**
-	 * 返回任务关键字，不能为空，需要爬虫具体实现
+	 * 返回任务类型，不能为空，需要爬虫具体实现
 	 * 
 	 * @author kimi
 	 * @return 返回值不能为空
 	 */
-	public abstract String getTaskkey();
+	public abstract TaskTypeEnum getTaskType();
 
 	/**
 	 * 判断爬虫是否处于运行中
@@ -112,16 +122,16 @@ public abstract class BaseCatcher {
 		if (this.isRunning) {
 			return;
 		}
-		Thread thread_catcher = new Thread(getTaskkey() + "_Catcher") {
+		Thread thread_catcher = new Thread(getTaskType() + "_Catcher") {
 			public void run() {
 				while (true) {
-					CatchTask task = taskQueueService.getTask(getTaskkey());
+					CatchTask task = taskQueueService.getTask(getTaskType());
 					try {
 						if (task == null) {// 当前没有任务，将抓取间隔调高waitMultiplier倍让出CPU资源
-							LOGGER.info("{}:no task", getTaskkey());
+							LOGGER.info("{}:no task", getTaskType());
 
 							if (waitTime == maxWaitTime) {
-								LOGGER.info("{}等待任务时间超时，爬虫退出，等待重新唤起。", getTaskkey());
+								LOGGER.info("{}等待任务时间超时，爬虫退出，等待重新唤起。", getTaskType());
 								break;
 							}
 							waitTime *= waitMultiplier;
@@ -145,7 +155,7 @@ public abstract class BaseCatcher {
 				isRunning = false;
 			}
 		};
-		LOGGER.info("{}:start", getTaskkey() + "_Catcher");
+		LOGGER.info("{}:start", getTaskType() + "_Catcher");
 		thread_catcher.start();
 		this.isRunning = true;
 	}

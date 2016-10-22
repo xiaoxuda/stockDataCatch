@@ -3,7 +3,6 @@
  */
 package com.kimi.stockanalysis.catcher.service;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -13,8 +12,12 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
+import com.kimi.stockanalysis.catcher.BaseCatcher;
 import com.kimi.stockanalysis.catcher.enums.CycleEnum;
 import com.kimi.stockanalysis.catcher.enums.TaskTypeEnum;
 import com.kimi.stockanalysis.dao.StockInfoDao;
@@ -25,27 +28,44 @@ import com.kimi.stockanalysis.entity.StockInfo;
  * 
  * @author kimi
  */
-public class TaskGenerateService {
+public class TaskGenerateService implements ApplicationContextAware {
 	private final Logger LOGGER = LoggerFactory.getLogger(TaskGenerateService.class);
 
 	@Autowired
 	private StockInfoDao stockInfoDao;
-	
+
 	@Autowired
 	private TaskQueueService taskQueueService;
-	
+
 	/** 生成任务执行开关 **/
 	private boolean isContinue = true;
 	/** 调度周期 ，毫秒 **/
 	private long time_gap = 5 * 60 * 1000L;
 	/** 上次调度时间 **/
-	private Map<String, Date> scheduleMap = new HashMap<String, Date>();
+	private Map<TaskTypeEnum, Date> scheduleMap = new HashMap<TaskTypeEnum, Date>();
+
+	/** 注册爬虫 **/
+	private Map<TaskTypeEnum, BaseCatcher> catcherMap = new HashMap<TaskTypeEnum, BaseCatcher>();
 
 	@PostConstruct
-	public void init(){
-		//FIXME 考虑将调度时间落入数据库，启动时从数据库读取
+	public void init() {
+		// FIXME 考虑将调度时间落入数据库，启动时从数据库读取
 	}
-	
+
+	/**
+	 * 自动注册已设置的爬虫
+	 */
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		// TODO Auto-generated method stub
+		Map<String, BaseCatcher> beansMap = applicationContext.getBeansOfType(BaseCatcher.class);
+		if (beansMap != null && beansMap.size() > 0) {
+			for (BaseCatcher catcher : beansMap.values()) {
+				catcherMap.put(catcher.getTaskType(), catcher);
+			}
+		}
+	}
+
 	/** 启动生成器 **/
 	public void startGenerator() {
 
@@ -54,12 +74,8 @@ public class TaskGenerateService {
 			public void run() {
 				while (true) {
 					if (isContinue) {
-						//commitStockInfoTask();
-						//commitDetailInfoTask();
-						//commitFinancailStatementTask();
-						commitPriceInfoTask();
-						//默认抓取最近五个季度的交易详情
-						//commitHistoryTradeDetailInfoTask(1);
+						commitCatchTaskAll(null);
+						// commitCatchTaskAll(TaskTypeEnum.SINAJS_PRICE);
 					}
 
 					try {
@@ -84,161 +100,70 @@ public class TaskGenerateService {
 	}
 
 	/**
-	 * 生成抓取公司详细信息的任务
-	 */
-	private void commitStockInfoTask() {
-		String typeCode = TaskTypeEnum.JUCAONET_COMPANY_LIST.getCode();
-		String cycleCode = TaskTypeEnum.JUCAONET_COMPANY_LIST.getCycle();
-		if (!CycleEnum.getByCode(cycleCode).isInNextCycle(scheduleMap.get(typeCode))) {
-			return;
-		}
-		// 更新调度时间
-		scheduleMap.put(typeCode, new Date());
-		CatchTask task = new CatchTask();
-		task.setUrl("http://www.cninfo.com.cn/cninfo-new/information/companylist");
-		task.setType(typeCode);
-		taskQueueService.commitTask(task);
-	}
-
-	/**
-	 * 生成抓取公司详细信息的任务
-	 */
-	private void commitDetailInfoTask() {
-		String typeCode = TaskTypeEnum.JUCAONET_COMPANY_SHARECAPITAL.getCode();
-		String cycleCode = TaskTypeEnum.JUCAONET_COMPANY_SHARECAPITAL.getCycle();
-		if (!CycleEnum.getByCode(cycleCode).isInNextCycle(scheduleMap.get(typeCode))) {
-			return;
-		}
-		// 更新调度时间
-		scheduleMap.put(typeCode, new Date());
-
-		//若没有查询到股票信息则清除调度信息
-		List<StockInfo> taskInfoList = stockInfoDao.selectList(new StockInfo());
-		if (taskInfoList == null || taskInfoList.size() == 0) {
-			scheduleMap.put(typeCode, null);
-			return;
-		}
-
-		for (StockInfo info : taskInfoList) {
-			CatchTask task_detail = new CatchTask();
-			task_detail.addInfo("code", info.getCode());
-			task_detail.addInfo("type", info.getType());
-			task_detail.setType(typeCode);
-			task_detail.setUrl(
-					"http://www.cninfo.com.cn/information/lastest/" + info.getType() + info.getCode() + ".html");
-			taskQueueService.commitTask(task_detail);
-		}
-	}
-
-	/**
-	 * 生成抓取股票当前价格的任务
+	 * 提交爬虫任务
 	 * 
+	 * @param typeEnum
+	 * @param stockInfo
 	 */
-	private void commitPriceInfoTask() {
-		String typeCode = TaskTypeEnum.SINAJS_PRICE.getCode();
-		String cycleCode = TaskTypeEnum.SINAJS_PRICE.getCycle();
-		if (!CycleEnum.getByCode(cycleCode).isInNextCycle(scheduleMap.get(typeCode))) {
-			return;
-		}
-		// 更新调度时间
-		scheduleMap.put(typeCode, new Date());
+	public void commitCatchTask(TaskTypeEnum typeEnum, StockInfo stockInfo) {
 
-		//若没有查询到股票信息则清除调度信息
-		List<StockInfo> taskInfoList = stockInfoDao.selectList(new StockInfo());
-		if (taskInfoList == null || taskInfoList.size() == 0) {
-			scheduleMap.put(typeCode, null);
-			return;
-		}
+		CatchTask task = catcherMap.get(typeEnum).generateTask(stockInfo);
 
-		for (StockInfo info : taskInfoList) {
-			CatchTask task_price = new CatchTask();
-			task_price.addInfo("code", info.getCode());
-			task_price.addInfo("type", info.getType());
-			task_price.setType(typeCode);
-			task_price.setUrl("http://hq.sinajs.cn/list=" + info.getType().substring(0, 2) + info.getCode());
-			taskQueueService.commitTask(task_price);
-		}
+		taskQueueService.commitTask(typeEnum, task);
 	}
 
 	/**
-	 * 生成抓取公司财务报表的任务
+	 * 生成爬虫任务,上市公司列表的任务除外
 	 * 
+	 * @param typeEnum
+	 *            可为null,为null时提交所有已注册爬虫任务
 	 */
-	private void commitFinancailStatementTask() {
-		String typeCode = TaskTypeEnum.EASTMONEYNET_STATEMENT.getCode();
-		String cycleCode = TaskTypeEnum.EASTMONEYNET_STATEMENT.getCycle();
-		if (!CycleEnum.getByCode(cycleCode).isInNextCycle(scheduleMap.get(typeCode))) {
+	public void commitCatchTaskAll(TaskTypeEnum typeEnum) {
+		// 生成股票列表抓取任务
+		if(refreshCycle(TaskTypeEnum.JUCAONET_COMPANY_LIST)){
+			commitCatchTask(TaskTypeEnum.JUCAONET_COMPANY_LIST, null);
+		}
+
+		// 跳过股票列表爬虫
+		if (TaskTypeEnum.JUCAONET_COMPANY_LIST.equals(typeEnum)) {
 			return;
 		}
-		// 更新调度时间
-		scheduleMap.put(typeCode, new Date());
 
-		//若没有查询到股票信息则清除调度信息
+		// 若没有查询到股票信息则清除调度信息
 		List<StockInfo> taskInfoList = stockInfoDao.selectList(new StockInfo());
 		if (taskInfoList == null || taskInfoList.size() == 0) {
-			scheduleMap.put(typeCode, null);
 			return;
 		}
-		for (StockInfo info : taskInfoList) {
-			CatchTask task = new CatchTask();
-			task.setType(typeCode);
-			
-			//数据源东方财富网，暂时停用
-/*			task.setUrl("http://soft-f9.eastmoney.com/soft/gp13.php?code=" + info.getCode()
-					+ StockInfoCatcher.typeMap.get(info.getType()));*/
-			//数据源同花顺
-			task.setUrl("http://stockpage.10jqka.com.cn/basic/"+ info.getCode() +"/main.txt");
-			
-			task.addInfo("code", info.getCode());
-			task.addInfo("type", info.getType());
-			taskQueueService.commitTask(task);
-		}
-	}
+		for (Map.Entry<TaskTypeEnum, BaseCatcher> entry : catcherMap.entrySet()) {
+			// 跳过股票列表爬虫
+			if (TaskTypeEnum.JUCAONET_COMPANY_LIST.equals(entry.getKey())) {
+				continue;
+			}
+			// 爬虫与指定不一致
+			if (null != typeEnum && !entry.getKey().equals(typeEnum)) {
+				continue;
+			}
 
-	/**
-	 * 生成抓取公司最近quarterCount个季度的历史交易信息的任务
-	 * @param quarterCount 需要抓取的以当前季度为起点的季度数量
-	 */
-	private void commitHistoryTradeDetailInfoTask(int quarterCount) {
-		String typeCode = TaskTypeEnum.SINAJS_HISTORY_TRADE_DETAIL.getCode();
-		String cycleCode = TaskTypeEnum.SINAJS_HISTORY_TRADE_DETAIL.getCycle();
-		if (!CycleEnum.getByCode(cycleCode).isInNextCycle(scheduleMap.get(typeCode))) {
-			return;
-		}
-		// 更新调度时间
-		scheduleMap.put(typeCode, new Date());
-		
-		//若没有查询到股票信息则清除调度信息
-		List<StockInfo> taskInfoList = stockInfoDao.selectList(new StockInfo());
-		if (taskInfoList == null || taskInfoList.size() == 0) {
-			scheduleMap.put(typeCode, null);
-			return;
-		}
-		
-		for (StockInfo info : taskInfoList) {
-			//获取当前年份和季度
-			Calendar calendar = Calendar.getInstance();
-			calendar.setTime(new Date());
-			int year = calendar.get(Calendar.YEAR);
-			int quarter = (int) Math.ceil((calendar.get(Calendar.MONTH) + 1)/3.0);
-			
-			for(int sub_num=0; sub_num<quarterCount ; sub_num++){
-				CatchTask task = new CatchTask();
-				task.setType(typeCode);
-				task.setUrl(
-						String.format("http://money.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/%s.phtml?year=%s&jidu=%s"
-								,info.getCode(), year , quarter));
-				task.addInfo("code", info.getCode());
-				task.addInfo("type", info.getType());
-				taskQueueService.commitTask(task);
-				
-				--quarter;
-				//上年第四季度
-				if(quarter == 0){
-					year -= 1;
-					quarter = 4;
+			if(refreshCycle(entry.getKey())){
+				for (StockInfo stockInfo : taskInfoList) {
+					commitCatchTask(entry.getKey(), stockInfo);
 				}
 			}
 		}
+	}
+
+	/**
+	 * 若在下一个调度周期内则刷新调度时间，若不在当前调度周期内则返回false
+	 * 
+	 * @return
+	 */
+	public boolean refreshCycle(TaskTypeEnum typeEnum) {
+		// 判断是否在调度周期内
+		if (!CycleEnum.getByCode(typeEnum.getCycle()).isInNextCycle(scheduleMap.get(typeEnum))) {
+			return false;
+		}
+		// 更新调度时间
+		scheduleMap.put(typeEnum, new Date());
+		return true;
 	}
 }

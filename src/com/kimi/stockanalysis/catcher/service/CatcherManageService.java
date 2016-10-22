@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.kimi.stockanalysis.catcher.BaseCatcher;
+import com.kimi.stockanalysis.catcher.enums.TaskTypeEnum;
 
 /**
  * 爬虫管理器
@@ -28,7 +29,7 @@ public class CatcherManageService implements ApplicationContextAware{
 	//爬虫检测时间间隔
 	private Long checkTimeGap = 10*1000L;
 	
-	private Map<String, BaseCatcher> catcherMap = new HashMap<String, BaseCatcher>();
+	private Map<TaskTypeEnum, BaseCatcher> catcherMap = new HashMap<TaskTypeEnum, BaseCatcher>();
 
 	@Autowired
 	private TaskQueueService taskQueueService;
@@ -42,7 +43,7 @@ public class CatcherManageService implements ApplicationContextAware{
 		Map<String,BaseCatcher> beansMap = applicationContext.getBeansOfType(BaseCatcher.class);
 		if(beansMap != null && beansMap.size()>0){
 			for(BaseCatcher catcher:beansMap.values()){
-				catcherMap.put(catcher.getTaskkey(), catcher);
+				catcherMap.put(catcher.getTaskType(), catcher);
 			}
 		}
 	}
@@ -53,8 +54,8 @@ public class CatcherManageService implements ApplicationContextAware{
 	 * @author kimi
 	 */
 	public void startCatcher() {
-		for (String key : catcherMap.keySet()) {
-			BaseCatcher catcher = catcherMap.get(key);
+		for (TaskTypeEnum type : catcherMap.keySet()) {
+			BaseCatcher catcher = catcherMap.get(type);
 			if (!catcher.isRunning()) {
 				catcher.start();
 			}
@@ -86,8 +87,8 @@ public class CatcherManageService implements ApplicationContextAware{
 	 * 重启爬虫任务,暂时没有实现睡眠唤醒功能
 	 */
 	public void catcherStateCheck(){
-		for(String key:taskQueueService.getKeySet()){
-			startCatcher(key);
+		for(TaskTypeEnum type:taskQueueService.getTypeSet()){
+			startCatcher(type);
 		}
 	}
 	
@@ -96,10 +97,10 @@ public class CatcherManageService implements ApplicationContextAware{
 	 * 
 	 * @author kimi
 	 */
-	public void startCatcher(String key) {
-		BaseCatcher catcher = catcherMap.get(key);
+	public void startCatcher(TaskTypeEnum type) {
+		BaseCatcher catcher = catcherMap.get(type);
 		if (null != catcher && !catcher.isRunning()) {
-			LOGGER.info("{}:爬虫重新启动",key);
+			LOGGER.info("{}:爬虫重新启动",type);
 			catcher.start();
 		}
 	}

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.kimi.stockanalysis.catcher.enums.TaskTypeEnum;
 import com.kimi.stockanalysis.catcher.service.CatchTask;
 import com.kimi.stockanalysis.entity.FinancailStatement;
+import com.kimi.stockanalysis.entity.StockInfo;
 import com.kimi.stockanalysis.service.StockDataService;
 
 /*
@@ -21,8 +22,8 @@ public class FinancailStatementCatcher extends BaseCatcher {
 	private StockDataService stockDataService;
 
 	@Override
-	public String getTaskkey() {
-		return TaskTypeEnum.EASTMONEYNET_STATEMENT.getCode();
+	public TaskTypeEnum getTaskType() {
+		return TaskTypeEnum.EASTMONEYNET_STATEMENT;
 	}
 
 	@Override
@@ -162,5 +163,21 @@ public class FinancailStatementCatcher extends BaseCatcher {
 			stockDataService.fsUpdateOrInsert(financailStatement);
 		}
 		return true;
+	}
+
+	@Override
+	public CatchTask generateTask(StockInfo stockInfo) {
+		CatchTask task = new CatchTask();
+		task.setType(this.getTaskType().getCode());
+		
+		//数据源东方财富网，暂时停用
+/*			task.setUrl("http://soft-f9.eastmoney.com/soft/gp13.php?code=" + stockInfo.getCode()
+				+ StockInfoCatcher.typeMap.get(stockInfo.getType()));*/
+		//数据源同花顺
+		task.setUrl("http://stockpage.10jqka.com.cn/basic/"+ stockInfo.getCode() +"/main.txt");
+		
+		task.addInfo("code", stockInfo.getCode());
+		task.addInfo("type", stockInfo.getType());
+		return task;
 	}
 }
