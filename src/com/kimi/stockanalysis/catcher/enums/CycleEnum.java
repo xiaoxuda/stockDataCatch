@@ -3,8 +3,6 @@
  */
 package com.kimi.stockanalysis.catcher.enums;
 
-import java.util.Date;
-
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -65,21 +63,5 @@ public enum CycleEnum {
 			}
 		}
 		return null;
-	}
-	
-	/**
-	 * 根据上次执行的时间点判断是否开启下一个周期
-	 * @param lastTimePoint
-	 * @return
-	 */
-	public boolean isInNextCycle(Date lastTimePoint){
-		//无上次执行时间点则默认执行
-		if(null == lastTimePoint){
-			return true;
-		}
-		Date now = new Date();
-		
-		return (now.getTime()-lastTimePoint.getTime()) >= this.getMicromillions()
-				? true : false;
 	}
 }

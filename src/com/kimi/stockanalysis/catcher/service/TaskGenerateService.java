@@ -18,7 +18,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import com.kimi.stockanalysis.catcher.BaseCatcher;
-import com.kimi.stockanalysis.catcher.enums.CycleEnum;
 import com.kimi.stockanalysis.catcher.enums.TaskTypeEnum;
 import com.kimi.stockanalysis.dao.StockInfoDao;
 import com.kimi.stockanalysis.entity.StockInfo;
@@ -74,8 +73,8 @@ public class TaskGenerateService implements ApplicationContextAware {
 			public void run() {
 				while (true) {
 					if (isContinue) {
-						commitCatchTaskAll(null);
-						// commitCatchTaskAll(TaskTypeEnum.SINAJS_PRICE);
+						// commitCatchTaskAll(null);
+						commitCatchTaskAll(TaskTypeEnum.SINAJS_PRICE);
 					}
 
 					try {
@@ -120,7 +119,7 @@ public class TaskGenerateService implements ApplicationContextAware {
 	 */
 	public void commitCatchTaskAll(TaskTypeEnum typeEnum) {
 		// 生成股票列表抓取任务
-		if(refreshCycle(TaskTypeEnum.JUCAONET_COMPANY_LIST)){
+		if (refreshCycle(TaskTypeEnum.JUCAONET_COMPANY_LIST)) {
 			commitCatchTask(TaskTypeEnum.JUCAONET_COMPANY_LIST, null);
 		}
 
@@ -144,7 +143,7 @@ public class TaskGenerateService implements ApplicationContextAware {
 				continue;
 			}
 
-			if(refreshCycle(entry.getKey())){
+			if (refreshCycle(entry.getKey())) {
 				for (StockInfo stockInfo : taskInfoList) {
 					commitCatchTask(entry.getKey(), stockInfo);
 				}
@@ -159,7 +158,7 @@ public class TaskGenerateService implements ApplicationContextAware {
 	 */
 	public boolean refreshCycle(TaskTypeEnum typeEnum) {
 		// 判断是否在调度周期内
-		if (!CycleEnum.getByCode(typeEnum.getCycle()).isInNextCycle(scheduleMap.get(typeEnum))) {
+		if (!typeEnum.isInNextCycle(scheduleMap.get(typeEnum))) {
 			return false;
 		}
 		// 更新调度时间

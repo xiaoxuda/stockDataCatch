@@ -94,7 +94,7 @@ public class StockInfoCatcher extends BaseCatcher {
 				si.setCode(code);
 				si.setName(s.substring(6).replace(" ", ""));
 				si.setType(type);
-
+				
 				stockDataService.siUpdateOrInsert(si);
 
 			}
